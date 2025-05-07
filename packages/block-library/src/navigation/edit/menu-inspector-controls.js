@@ -11,6 +11,7 @@ import {
 	__experimentalHStack as HStack,
 	__experimentalHeading as Heading,
 	Spinner,
+	SelectControl,
 } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
@@ -174,6 +175,20 @@ const MenuInspectorControls = ( props ) => {
 					) }
 				</HStack>
 				<MainContent { ...props } />
+				<SelectControl
+					label={ __( 'Collapsed Menu Icon' ) }
+					value={ props.attributes?.collapsedIcon || 'menu' }
+					options={ [
+						{ label: 'Hamburger', value: 'menu' },
+						{ label: 'Dots Vertical', value: 'dotsVertical' },
+						{ label: 'Arrow Right', value: 'arrowRight' },
+					] }
+					onChange={ ( value ) =>
+						props.setAttributes( { collapsedIcon: value } )
+					}
+					__next40pxDefaultSize
+					__nextHasNoMarginBottom
+				/>
 			</PanelBody>
 		</InspectorControls>
 	);

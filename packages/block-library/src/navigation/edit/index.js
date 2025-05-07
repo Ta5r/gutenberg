@@ -224,6 +224,7 @@ function Navigation( {
 		} = {},
 		hasIcon,
 		icon = 'handle',
+		collapsedIcon = 'menu',
 	} = attributes;
 
 	const ref = attributes.ref;
@@ -612,7 +613,9 @@ function Navigation( {
 								>
 									{ hasIcon && (
 										<>
-											<OverlayMenuIcon icon={ icon } />
+											<OverlayMenuIcon
+												icon={ collapsedIcon }
+											/>
 											<Icon icon={ close } />
 										</>
 									) }
