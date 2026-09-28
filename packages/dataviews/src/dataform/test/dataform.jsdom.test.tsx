@@ -1467,4 +1467,160 @@ describe( 'DataForm component', () => {
 			).not.toBeInTheDocument();
 		} );
 	} );
+
+	describe( 'compare and revisions mode', () => {
+		const compareFields = [
+			{
+				id: 'title',
+				label: 'Title',
+				type: 'text' as const,
+			},
+			{
+				id: 'description',
+				label: 'Description',
+				type: 'text' as const,
+			},
+			{
+				id: 'status',
+				label: 'Status',
+				type: 'text' as const,
+			},
+			{
+				id: 'category',
+				label: 'Category',
+				type: 'text' as const,
+			},
+		];
+
+		const form = {
+			layout: { type: 'regular' as const },
+			fields: [ 'title', 'description', 'status', 'category' ],
+		};
+
+		it( 'renders in read-only mode and displays comparison badges when previousData is provided', () => {
+			const previousData = {
+				title: 'Original Title',
+				description: 'Original Description',
+				status: 'draft',
+				category: 'News',
+			};
+
+			const currentData = {
+				title: 'Updated Title', // modified
+				description: 'Original Description', // unchanged
+				status: 'published', // modified
+				category: '', // removed
+				// and suppose an added field
+			};
+
+			render(
+				<Dataform
+					data={ currentData }
+					previousData={ previousData }
+					fields={ compareFields }
+					form={ form }
+				/>
+			);
+
+			// Comparison badges should be visible for changed fields
+			expect( screen.getAllByText( 'Modified' ) ).toHaveLength( 2 );
+			expect( screen.getByText( 'Removed' ) ).toBeInTheDocument();
+			expect( screen.queryByText( 'Added' ) ).not.toBeInTheDocument();
+
+			// In comparison mode, fields should be rendered in read-only mode (no text inputs)
+			expect(
+				screen.queryByRole( 'textbox', { name: 'Title' } )
+			).not.toBeInTheDocument();
+			expect( screen.getByText( 'Updated Title' ) ).toBeInTheDocument();
+		} );
+
+		it( 'identifies newly added fields', () => {
+			const previousData = {
+				title: 'Original Title',
+				description: '',
+			};
+
+			const currentData = {
+				title: 'Original Title',
+				description: 'New Description Added',
+			};
+
+			render(
+				<Dataform
+					data={ currentData }
+					previousData={ previousData }
+					fields={ compareFields.slice( 0, 2 ) }
+					form={ {
+						layout: { type: 'regular' as const },
+						fields: [ 'title', 'description' ],
+					} }
+				/>
+			);
+
+			expect( screen.getByText( 'Added' ) ).toBeInTheDocument();
+			expect( screen.queryByText( 'Modified' ) ).not.toBeInTheDocument();
+		} );
+
+		it( 'supports side-by-side comparison mode', () => {
+			const previousData = {
+				title: 'Old Title',
+			};
+
+			const currentData = {
+				title: 'New Title',
+			};
+
+			const { container } = render(
+				<Dataform
+					data={ currentData }
+					previousData={ previousData }
+					compareMode="side-by-side"
+					fields={ [ compareFields[ 0 ] ] }
+					form={ {
+						layout: { type: 'regular' as const },
+						fields: [ 'title' ],
+					} }
+				/>
+			);
+
+			expect(
+				container.querySelector(
+					'.dataforms-layouts__comparison-side-by-side'
+				)
+			).not.toBeNull();
+			expect( screen.getByText( 'Old Title' ) ).toBeInTheDocument();
+			expect( screen.getByText( 'New Title' ) ).toBeInTheDocument();
+		} );
+
+		it( 'supports stacked comparison mode', () => {
+			const previousData = {
+				title: 'Old Title',
+			};
+
+			const currentData = {
+				title: 'New Title',
+			};
+
+			const { container } = render(
+				<Dataform
+					data={ currentData }
+					previousData={ previousData }
+					compareMode="stacked"
+					fields={ [ compareFields[ 0 ] ] }
+					form={ {
+						layout: { type: 'regular' as const },
+						fields: [ 'title' ],
+					} }
+				/>
+			);
+
+			expect(
+				container.querySelector(
+					'.dataforms-layouts__comparison-stacked'
+				)
+			).not.toBeNull();
+			expect( screen.getByText( 'Old Title' ) ).toBeInTheDocument();
+			expect( screen.getByText( 'New Title' ) ).toBeInTheDocument();
+		} );
+	} );
 } );
