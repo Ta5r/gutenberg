@@ -467,6 +467,16 @@ export interface ViewTable extends ViewBase {
 		 * `'1/1'`.
 		 */
 		aspectRatio?: MediaAspectRatio;
+
+		/**
+		 * How actions are rendered.
+		 *
+		 * - `'text'`: Actions render as text links that appear on hover/focus.
+		 * - `'button'`: Actions render as always-visible buttons.
+		 *
+		 * @default 'text'
+		 */
+		actions?: 'text' | 'button';
 	};
 }
 
@@ -484,6 +494,16 @@ export interface ViewList extends ViewBase {
 		 * The density of the view.
 		 */
 		density?: Density;
+
+		/**
+		 * How actions are rendered.
+		 *
+		 * - `'text'`: Actions render as text links that appear on hover/focus.
+		 * - `'button'`: Actions render as always-visible buttons.
+		 *
+		 * @default 'text'
+		 */
+		actions?: 'text' | 'button';
 	};
 }
 
@@ -543,6 +563,16 @@ export interface ViewGrid extends ViewBase {
 		 * either way, so rows stay aligned. Defaults to `'cover'`.
 		 */
 		mediaFit?: MediaFit;
+
+		/**
+		 * How actions are rendered.
+		 *
+		 * - `'text'`: Actions render as text links that appear on hover/focus.
+		 * - `'button'`: Actions render as always-visible buttons.
+		 *
+		 * @default 'text'
+		 */
+		actions?: 'text' | 'button';
 	};
 }
 
@@ -578,6 +608,16 @@ export interface ViewPickerGrid extends ViewBase {
 		 * aligned. Defaults to `'cover'`.
 		 */
 		mediaFit?: MediaFit;
+
+		/**
+		 * How actions are rendered.
+		 *
+		 * - `'text'`: Actions render as text links that appear on hover/focus.
+		 * - `'button'`: Actions render as always-visible buttons.
+		 *
+		 * @default 'text'
+		 */
+		actions?: 'text' | 'button';
 	};
 }
 
@@ -606,6 +646,16 @@ export interface ViewPickerTable extends ViewBase {
 		 * Whether the view allows column moving.
 		 */
 		enableMoving?: boolean;
+
+		/**
+		 * How actions are rendered.
+		 *
+		 * - `'text'`: Actions render as text links that appear on hover/focus.
+		 * - `'button'`: Actions render as always-visible buttons.
+		 *
+		 * @default 'text'
+		 */
+		actions?: 'text' | 'button';
 	};
 }
 
@@ -680,6 +730,16 @@ interface ActionBase< Item > {
 	 * This is only a "meta" information for now.
 	 */
 	context?: 'list' | 'single';
+
+	/**
+	 * The visual variant of the action when rendered as a button.
+	 *
+	 * - `'button-default'`: Default button style (solid/primary).
+	 * - `'button-outline'`: Outline button style (secondary).
+	 *
+	 * @default 'button-default'
+	 */
+	variant?: 'button-default' | 'button-outline';
 }
 
 /**
