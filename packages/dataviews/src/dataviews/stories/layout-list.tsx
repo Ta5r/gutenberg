@@ -13,6 +13,7 @@ export const LayoutTableComponent = ( {
 	groupByLabel = true,
 	perPageSizes = [ 10, 25, 50, 100 ],
 	showMedia = true,
+	actionsLayout = 'text',
 }: {
 	backgroundColor?: string;
 	fullWidth?: boolean;
@@ -21,12 +22,16 @@ export const LayoutTableComponent = ( {
 	groupByLabel?: boolean;
 	perPageSizes?: number[];
 	showMedia?: boolean;
+	actionsLayout?: 'text' | 'button';
 } ) => {
 	const [ view, setView ] = useState< View >( {
 		type: LAYOUT_LIST,
 		search: '',
 		page: 1,
 		perPage: 10,
+		layout: {
+			actions: actionsLayout,
+		},
 		filters: [],
 		fields: [ 'categories' ],
 		titleField: 'title',
@@ -47,9 +52,13 @@ export const LayoutTableComponent = ( {
 						}
 					: undefined,
 				showMedia,
+				layout: {
+					...prevView.layout,
+					actions: actionsLayout,
+				},
 			};
 		} );
-	}, [ groupBy, groupByLabel, showMedia ] );
+	}, [ groupBy, groupByLabel, showMedia, actionsLayout ] );
 
 	const { data: shownData, paginationInfo } = useMemo( () => {
 		return filterSortAndPaginate( data, view, fields );

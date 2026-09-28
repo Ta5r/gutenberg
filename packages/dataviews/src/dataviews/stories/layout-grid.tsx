@@ -14,6 +14,7 @@ export const LayoutTableComponent = ( {
 	mediaFitControl = true,
 	perPageSizes = [ 10, 25, 50, 100 ],
 	showMedia = true,
+	actionsLayout = 'text',
 }: {
 	backgroundColor?: string;
 	hasClickableItems?: boolean;
@@ -23,6 +24,7 @@ export const LayoutTableComponent = ( {
 	mediaFitControl?: boolean;
 	perPageSizes?: number[];
 	showMedia?: boolean;
+	actionsLayout?: 'text' | 'button';
 } ) => {
 	const [ view, setView ] = useState< View >( {
 		type: LAYOUT_GRID,
@@ -35,7 +37,7 @@ export const LayoutTableComponent = ( {
 		descriptionField: 'description',
 		mediaField: 'image',
 		showMedia,
-		layout: { mediaFit },
+		layout: { mediaFit, actions: actionsLayout },
 	} );
 
 	useEffect( () => {
@@ -52,10 +54,10 @@ export const LayoutTableComponent = ( {
 				showMedia,
 				// Spread the previous layout so a change made through the
 				// view options popover survives an unrelated arg change.
-				layout: { ...prevView.layout, mediaFit },
+				layout: { ...prevView.layout, mediaFit, actions: actionsLayout },
 			} as View;
 		} );
-	}, [ groupBy, groupByLabel, mediaFit, showMedia ] );
+	}, [ groupBy, groupByLabel, mediaFit, showMedia, actionsLayout ] );
 
 	const { data: shownData, paginationInfo } = useMemo( () => {
 		return filterSortAndPaginate( data, view, fields );

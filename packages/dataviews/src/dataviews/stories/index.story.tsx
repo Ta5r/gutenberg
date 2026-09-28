@@ -88,6 +88,11 @@ export const LayoutTable = {
 			control: 'boolean',
 			description: 'Whether to display the media field',
 		},
+		actionsLayout: {
+			control: 'select',
+			options: [ 'text', 'button' ],
+			description: 'How actions are rendered: text or button',
+		},
 	},
 };
 
@@ -144,6 +149,11 @@ export const LayoutGrid = {
 			control: 'boolean',
 			description: 'Whether to display the media field',
 		},
+		actionsLayout: {
+			control: 'select',
+			options: [ 'text', 'button' ],
+			description: 'How actions are rendered: text or button',
+		},
 	},
 };
 
@@ -187,6 +197,11 @@ export const LayoutList = {
 		showMedia: {
 			control: 'boolean',
 			description: 'Whether to display the media field',
+		},
+		actionsLayout: {
+			control: 'select',
+			options: [ 'text', 'button' ],
+			description: 'How actions are rendered: text or button',
 		},
 	},
 };

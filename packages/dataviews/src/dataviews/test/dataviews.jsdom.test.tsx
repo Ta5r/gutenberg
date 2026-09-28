@@ -1323,6 +1323,182 @@ describe( 'DataViews component', () => {
 			).toEqual( 3 );
 		} );
 	} );
+
+	describe( 'actions as buttons (layout.actions === "button")', () => {
+		const buttonDefaultActions: Action< Data >[] = [
+			{
+				id: 'respond',
+				label: 'Respond',
+				isPrimary: true,
+				variant: 'button-default',
+				callback: () => {},
+			},
+		];
+
+		const buttonOutlineActions: Action< Data >[] = [
+			{
+				id: 'view-details',
+				label: 'View details',
+				isPrimary: true,
+				variant: 'button-outline',
+				callback: () => {},
+			},
+		];
+
+		it( 'should render primary action with is-primary variant in table layout by default or with button-default', () => {
+			const { container } = render(
+				<DataViewWrapper
+					view={ {
+						type: LAYOUT_TABLE,
+						layout: {
+							actions: 'button',
+						},
+					} }
+					actions={ buttonDefaultActions }
+				/>
+			);
+
+			const buttons = screen.getAllByRole( 'button', { name: 'Respond' } );
+			expect( buttons.length ).toBeGreaterThan( 0 );
+			expect( buttons[ 0 ] ).toHaveClass( 'is-primary' );
+			expect(
+				container.querySelector(
+					'.dataviews-item-actions.has-button-actions'
+				)
+			).toBeInTheDocument();
+		} );
+
+		it( 'should render primary action with is-secondary variant in table layout when variant is button-outline', () => {
+			render(
+				<DataViewWrapper
+					view={ {
+						type: LAYOUT_TABLE,
+						layout: {
+							actions: 'button',
+						},
+					} }
+					actions={ buttonOutlineActions }
+				/>
+			);
+
+			const buttons = screen.getAllByRole( 'button', {
+				name: 'View details',
+			} );
+			expect( buttons.length ).toBeGreaterThan( 0 );
+			expect( buttons[ 0 ] ).toHaveClass( 'is-secondary' );
+		} );
+
+		it( 'should keep button actions visible on mobile viewport in table layout', () => {
+			mockUseViewportMatch.mockImplementation(
+				( viewport: string, operator: string ) =>
+					viewport === 'medium' && operator === '<'
+			);
+
+			render(
+				<DataViewWrapper
+					view={ {
+						type: LAYOUT_TABLE,
+						layout: {
+							actions: 'button',
+						},
+					} }
+					actions={ buttonDefaultActions }
+				/>
+			);
+
+			expect(
+				screen.getAllByRole( 'button', { name: 'Respond' } ).length
+			).toBeGreaterThan( 0 );
+
+			mockUseViewportMatch.mockImplementation( () => false );
+		} );
+
+		it( 'should render primary action with is-primary or is-secondary in list layout', () => {
+			const { container, rerender } = render(
+				<DataViewWrapper
+					view={ {
+						type: LAYOUT_LIST,
+						layout: {
+							actions: 'button',
+						},
+					} }
+					actions={ buttonDefaultActions }
+				/>
+			);
+
+			const defaultButtons = screen.getAllByRole( 'button', {
+				name: 'Respond',
+			} );
+			expect( defaultButtons.length ).toBeGreaterThan( 0 );
+			expect( defaultButtons[ 0 ] ).toHaveClass( 'is-primary' );
+			expect(
+				container.querySelector(
+					'.dataviews-view-list__item-actions.has-button-actions'
+				)
+			).toBeInTheDocument();
+
+			rerender(
+				<DataViewWrapper
+					view={ {
+						type: LAYOUT_LIST,
+						layout: {
+							actions: 'button',
+						},
+					} }
+					actions={ buttonOutlineActions }
+				/>
+			);
+
+			const outlineButtons = screen.getAllByRole( 'button', {
+				name: 'View details',
+			} );
+			expect( outlineButtons.length ).toBeGreaterThan( 0 );
+			expect( outlineButtons[ 0 ] ).toHaveClass( 'is-secondary' );
+		} );
+
+		it( 'should render primary action at the bottom of cards in grid layout', () => {
+			const { container, rerender } = render(
+				<DataViewWrapper
+					view={ {
+						type: LAYOUT_GRID,
+						layout: {
+							actions: 'button',
+						},
+					} }
+					actions={ buttonOutlineActions }
+				/>
+			);
+
+			const cardActionsContainers = container.querySelectorAll(
+				'.dataviews-view-grid__card-actions'
+			);
+			expect( cardActionsContainers.length ).toBeGreaterThan( 0 );
+			const gridButtons = screen.getAllByRole( 'button', {
+				name: 'View details',
+			} );
+			expect( gridButtons[ 0 ] ).toHaveClass( 'is-secondary' );
+
+			// When layout.actions is text (default), card-actions is not rendered
+			rerender(
+				<DataViewWrapper
+					view={ {
+						type: LAYOUT_GRID,
+						layout: {
+							actions: 'text',
+						},
+					} }
+					actions={ buttonOutlineActions }
+				/>
+			);
+
+			expect(
+				container.querySelectorAll(
+					'.dataviews-view-grid__card-actions'
+				).length
+			).toBe( 0 );
+		} );
+	} );
+
 	describe( 'Default layouts', () => {
 		/**
 		 * A minimal wrapper that intentionally omits the `defaultLayouts` prop so
