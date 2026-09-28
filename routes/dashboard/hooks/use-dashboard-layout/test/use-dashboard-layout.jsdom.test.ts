@@ -68,8 +68,12 @@ describe( 'useDashboardLayout', () => {
 		expect( layout ).toEqual( SAMPLE_LAYOUT );
 	} );
 
-	it( 'restores the registered default via resetLayout', async () => {
-		mockedApiFetch.mockResolvedValueOnce( DEFAULT_LAYOUT );
+	it( 'restores the layout via resetLayout', async () => {
+		mockedApiFetch.mockResolvedValueOnce( {
+			layout: DEFAULT_LAYOUT,
+			is_site_layout: false,
+			can_edit_site_layout: false,
+		} );
 
 		const { result } = renderHook( () =>
 			useDashboardLayout( DASHBOARD_NAME )
@@ -86,10 +90,63 @@ describe( 'useDashboardLayout', () => {
 		} );
 
 		expect( mockedApiFetch ).toHaveBeenCalledWith( {
-			path: `/wp/v2/dashboards/${ DASHBOARD_NAME }/default-layout`,
+			path: `/wp/v2/dashboards/${ DASHBOARD_NAME }/layout`,
 		} );
 
 		const [ layout ] = result.current;
 		expect( layout ).toEqual( DEFAULT_LAYOUT );
+	} );
+
+	it( 'saves site-level layout via saveSiteLayout', async () => {
+		mockedApiFetch.mockResolvedValueOnce( {
+			layout: SAMPLE_LAYOUT,
+			is_site_layout: true,
+			can_edit_site_layout: true,
+		} );
+
+		const { result } = renderHook( () =>
+			useDashboardLayout( DASHBOARD_NAME )
+		);
+
+		await act( async () => {
+			const [ , , , controls ] = result.current;
+			await controls.saveSiteLayout( SAMPLE_LAYOUT );
+		} );
+
+		expect( mockedApiFetch ).toHaveBeenCalledWith( {
+			path: `/wp/v2/dashboards/${ DASHBOARD_NAME }/layout`,
+			method: 'POST',
+			data: { layout: SAMPLE_LAYOUT },
+		} );
+
+		const [ layout, , , controls ] = result.current;
+		expect( layout ).toEqual( SAMPLE_LAYOUT );
+		expect( controls.isSiteLayout ).toBe( true );
+	} );
+
+	it( 'resets site-level layout via resetSiteLayout', async () => {
+		mockedApiFetch.mockResolvedValueOnce( {
+			layout: DEFAULT_LAYOUT,
+			is_site_layout: false,
+			can_edit_site_layout: true,
+		} );
+
+		const { result } = renderHook( () =>
+			useDashboardLayout( DASHBOARD_NAME )
+		);
+
+		await act( async () => {
+			const [ , , , controls ] = result.current;
+			await controls.resetSiteLayout();
+		} );
+
+		expect( mockedApiFetch ).toHaveBeenCalledWith( {
+			path: `/wp/v2/dashboards/${ DASHBOARD_NAME }/layout`,
+			method: 'DELETE',
+		} );
+
+		const [ layout, , , controls ] = result.current;
+		expect( layout ).toEqual( DEFAULT_LAYOUT );
+		expect( controls.isSiteLayout ).toBe( false );
 	} );
 } );
