@@ -174,6 +174,16 @@ _Note:_ While it is possible to return a string value from `save`, it _will be e
 _Note:_ The save function should be a pure and stateless function that depends only on the attributes used to invoke it. It shouldn't use any APIs such as `useState` or `useEffect`, nor retrieve information from another source; for example, it is not possible to use the data module inside - `select( store ).selector( ... )`.
 This is because if the external information changes, the block may be flagged as invalid when the post is later edited ([read more about Validation](#validation)).
 
+> **Warning:** Do not use internationalization or translation functions (such as `__()`, `_x()`, `_n()`, or `_nx()`) inside the `save` function.
+>
+> Translation functions depend on external state (the current user's or site's locale), violating function purity. When a block uses translation functions in `save`:
+> - If an editor with a different backend language setting edits or opens the post, the generated HTML will not match the HTML stored in `post_content`, triggering a **block validation failure and block recovery prompt**.
+> - In **Real-Time Collaboration (RTC)** environments, collaborators using different languages will experience synchronization conflicts, false block recovery alerts, and unintended overwriting of localized content.
+>
+> Core provides the `@wordpress/no-i18n-in-save` ESLint rule to help catch this anti-pattern. If your block needs to output localized text, consider these alternatives:
+> - For UI labels, static notices, or dynamically translatable output, make the block dynamic (using `render.php` or `render_callback` in PHP) so strings are translated at render time according to the visitor's or site's locale.
+> - For user-customizable content, store the text as an attribute and allow editors to modify or translate it directly within the `edit` interface.
+
 If there is a need to have other information as part of the save, developers can consider one of these two alternatives:
 
 -   Use [dynamic blocks](/docs/how-to-guides/block-tutorial/creating-dynamic-blocks.md) and dynamically retrieve the required information on the server.
