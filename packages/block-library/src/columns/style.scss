@@ -33,7 +33,7 @@
 	}
 
 	&:not(.is-not-stacked-on-mobile) > .wp-block-column {
-		@media (max-width: #{ ($break-medium - 1) }) {
+		@media screen and (max-width: #{ ($break-medium - 1) }) {
 			// Responsiveness: Show at most one columns on mobile. This must be
 			// important since the Column assigns its own width as an inline style.
 			flex-basis: 100% !important;
@@ -53,6 +53,19 @@
 
 			// Columns with an explicitly-assigned width should maintain their
 			// `flex-basis` width and not grow.
+			&[style*="flex-basis"] {
+				flex-grow: 0;
+			}
+		}
+	}
+
+	@media print {
+		flex-wrap: nowrap !important;
+
+		&:not(.is-not-stacked-on-mobile) > .wp-block-column {
+			flex-basis: 0;
+			flex-grow: 1;
+
 			&[style*="flex-basis"] {
 				flex-grow: 0;
 			}
