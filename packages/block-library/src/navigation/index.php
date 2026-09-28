@@ -94,6 +94,15 @@ class WP_Navigation_Block_Renderer {
 	private static $has_submenus = false;
 
 	/**
+	 * Cache of submenu detection results keyed by inner_blocks object id.
+	 *
+	 * @since 6.8.0
+	 *
+	 * @var array<int, bool>
+	 */
+	private static $has_submenus_cache = array();
+
+	/**
 	 * Used to determine which blocks need an <li> wrapper.
 	 *
 	 * @since 6.5.0
@@ -142,9 +151,13 @@ class WP_Navigation_Block_Renderer {
 	 * @return bool Returns whether or not a navigation has a submenu and also sets the member variable.
 	 */
 	private static function has_submenus( $inner_blocks ) {
-		if ( true === static::$has_submenus ) {
-			return static::$has_submenus;
+		$cache_key = is_object( $inner_blocks ) ? spl_object_id( $inner_blocks ) : null;
+		if ( null !== $cache_key && isset( static::$has_submenus_cache[ $cache_key ] ) ) {
+			static::$has_submenus = static::$has_submenus_cache[ $cache_key ];
+			return static::$has_submenus_cache[ $cache_key ];
 		}
+
+		$has_submenus = false;
 
 		foreach ( $inner_blocks as $inner_block ) {
 			// If this is a page list then work out if any of the pages have children.
@@ -157,19 +170,25 @@ class WP_Navigation_Block_Renderer {
 				);
 				foreach ( (array) $all_pages as $page ) {
 					if ( $page->post_parent ) {
-						static::$has_submenus = true;
+						$has_submenus = true;
 						break;
 					}
 				}
 			}
 			// If this is a navigation submenu then we know we have submenus.
 			if ( 'core/navigation-submenu' === $inner_block->name ) {
-				static::$has_submenus = true;
+				$has_submenus = true;
 				break;
 			}
 		}
 
-		return static::$has_submenus;
+		if ( null !== $cache_key ) {
+			static::$has_submenus_cache[ $cache_key ] = $has_submenus;
+		}
+
+		static::$has_submenus = $has_submenus;
+
+		return $has_submenus;
 	}
 
 	/**
@@ -1075,12 +1094,18 @@ class WP_Navigation_Block_Renderer {
 		$is_within_overlay = $attributes['_isWithinOverlayTemplatePart'] ?? false;
 		$tag_name          = $is_within_overlay ? 'div' : 'nav';
 
-		return sprintf(
+		$output = sprintf(
 			'<%1$s %2$s>%3$s</%1$s>',
 			$tag_name,
 			static::get_nav_attributes( $attributes, $inner_blocks ),
 			static::get_inner_block_markup( $attributes, $inner_blocks )
 		);
+
+		if ( is_object( $inner_blocks ) ) {
+			unset( static::$has_submenus_cache[ spl_object_id( $inner_blocks ) ] );
+		}
+
+		return $output;
 	}
 }
 
