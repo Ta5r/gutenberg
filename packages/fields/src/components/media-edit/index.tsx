@@ -930,6 +930,15 @@ export function MediaEditControl< Item >( {
 					// warning.
 					unstableFeaturedImageFlow={ featuredImageFlow }
 					onSelect={ ( selectedMedia: any ) => {
+						// Invalidate attachment queries so in-modal edits (e.g. crop)
+						// refetch across both the field control and the canvas.
+						receiveEntityRecords(
+							'postType',
+							'attachment',
+							[],
+							undefined,
+							true
+						);
 						if ( ! multiple ) {
 							onChangeControl( selectedMedia.id );
 							setTargetItemId( undefined );
