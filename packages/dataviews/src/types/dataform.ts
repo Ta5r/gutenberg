@@ -523,11 +523,25 @@ export type NormalizedForm = {
 };
 
 /**
+ * The change status of a field when compared against previous data in compare/revisions mode.
+ */
+export type FieldComparisonStatus =
+	| 'added'
+	| 'removed'
+	| 'modified'
+	| 'unchanged';
+
+/**
+ * The display mode when comparing against previous data in DataForm.
+ */
+export type CompareMode = 'inline' | 'side-by-side' | 'stacked';
+
+/**
  * The props of the DataForm component.
  */
 export interface DataFormProps< Item > {
 	/**
-	 * The item being edited.
+	 * The item being edited or reviewed.
 	 */
 	data: Item;
 
@@ -546,14 +560,29 @@ export interface DataFormProps< Item > {
 	 * item returned by the field's `setValue`. By default that is an object
 	 * keyed by field id, nested for dotted ids (e.g. `{ a: { b: value } }`
 	 * for the field `a.b`); a custom `setValue` may return any other partial
-	 * shape of the item.
+	 * shape of the item. Optional when running in compare/revisions mode.
 	 */
-	onChange: ( value: Record< string, any > ) => void;
+	onChange?: ( value: Record< string, any > ) => void;
 
 	/**
 	 * The validity state of the form's fields, keyed by field id.
 	 */
 	validity?: FormValidity;
+
+	/**
+	 * Previous data item to compare against in revisions or compare mode.
+	 * When provided, DataForm operates in read-only comparison mode and
+	 * highlights additions, removals, and modifications.
+	 */
+	previousData?: Item;
+
+	/**
+	 * The comparison layout mode when previousData is provided:
+	 * - `inline`: displays comparison badges alongside current field values (default).
+	 * - `side-by-side`: displays previous and current values side by side.
+	 * - `stacked`: displays previous value stacked above the current value.
+	 */
+	compareMode?: CompareMode;
 }
 
 /**
