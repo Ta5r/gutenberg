@@ -18,13 +18,23 @@ export default function invalidateAttachmentResolutions( registry ) {
 	const resolvers = registry.select( coreStore ).getCachedResolvers();
 
 	// These behave like a Map, with the selector's arguments as the key.
-	const entityRecordResolutions = resolvers.getEntityRecords;
+	const entityRecordsResolutions = resolvers.getEntityRecords;
+
+	entityRecordsResolutions?.forEach( ( _value, args ) => {
+		if ( args[ 0 ] === 'postType' && args[ 1 ] === 'attachment' ) {
+			registry
+				.dispatch( coreStore )
+				.invalidateResolution( 'getEntityRecords', args );
+		}
+	} );
+
+	const entityRecordResolutions = resolvers.getEntityRecord;
 
 	entityRecordResolutions?.forEach( ( _value, args ) => {
 		if ( args[ 0 ] === 'postType' && args[ 1 ] === 'attachment' ) {
 			registry
 				.dispatch( coreStore )
-				.invalidateResolution( 'getEntityRecords', args );
+				.invalidateResolution( 'getEntityRecord', args );
 		}
 	} );
 }
