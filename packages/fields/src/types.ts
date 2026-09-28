@@ -87,9 +87,9 @@ export interface BasePostWithEmbeddedFeaturedMedia extends BasePost {
 	_embedded: EmbeddedFeaturedMedia;
 }
 
-interface TemplateAuthorFields {
+export interface TemplateAuthorFields {
 	author?: number;
-	author_text: string;
+	author_text?: string;
 	original_source?: 'theme' | 'plugin' | 'site' | 'user';
 }
 
@@ -114,7 +114,7 @@ export interface TemplatePart extends CommonPost, TemplateAuthorFields {
 	plugin?: string;
 }
 
-export interface Pattern extends CommonPost {
+export interface Pattern extends CommonPost, Partial< TemplateAuthorFields > {
 	slug: string;
 	title: { raw: string };
 	excerpt?: string | { raw: string; rendered: string };

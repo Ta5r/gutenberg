@@ -9,9 +9,9 @@ import {
 	globe as globeIcon,
 } from '@wordpress/icons';
 import { Icon, Stack } from '@wordpress/ui';
-import type { Template, TemplatePart } from '../../types';
+import type { Template, TemplatePart, Pattern } from '../../types';
 
-function getIconForSource( originalSource: Template[ 'original_source' ] ) {
+function getIconForSource( originalSource?: string ) {
 	switch ( originalSource ) {
 		case 'theme':
 			return themeIcon;
@@ -27,7 +27,7 @@ function getIconForSource( originalSource: Template[ 'original_source' ] ) {
 export default function TemplateAuthorView( {
 	item,
 }: {
-	item: Template | TemplatePart;
+	item: Template | TemplatePart | Pattern;
 } ) {
 	const [ isImageLoaded, setIsImageLoaded ] = useState( false );
 	const originalSource = item.original_source;
