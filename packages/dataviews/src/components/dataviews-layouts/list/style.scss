@@ -48,6 +48,12 @@ div.dataviews-view-list {
 				overflow: hidden;
 				width: 0;
 			}
+
+			&.has-button-actions > :not(:last-child) {
+				flex: initial;
+				overflow: visible;
+				width: auto;
+			}
 		}
 
 		&:where(.is-selected, .is-hovered, :focus-within) {

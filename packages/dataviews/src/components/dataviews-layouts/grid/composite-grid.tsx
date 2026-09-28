@@ -14,9 +14,11 @@ import {
 	useContext,
 	useRef,
 	forwardRef,
+	useMemo,
 } from '@wordpress/element';
+import { useRegistry } from '@wordpress/data';
 import { MEDIA_ASPECT_RATIOS } from '../../../constants';
-import ItemActions from '../../dataviews-item-actions';
+import ItemActions, { PrimaryActions } from '../../dataviews-item-actions';
 import DataViewsSelectionCheckbox from '../../dataviews-selection-checkbox';
 import DataViewsContext from '../../dataviews-context';
 import {
@@ -103,6 +105,14 @@ const GridItem = forwardRef< HTMLDivElement, GridItemProps< any > >(
 			showMedia = true,
 			showDescription = true,
 		} = view;
+		const registry = useRegistry();
+		const primaryActions = useMemo( () => {
+			return actions.filter(
+				( action ) =>
+					action.isPrimary &&
+					( ! action.isEligible || action.isEligible( item ) )
+			);
+		}, [ actions, item ] );
 		const hasBulkAction = useHasAPossibleBulkAction( actions, item );
 		const id = getItemId( item );
 		const elementRef = useRef< HTMLDivElement | null >( null );
@@ -309,6 +319,20 @@ const GridItem = forwardRef< HTMLDivElement, GridItemProps< any > >(
 						</Stack>
 					) }
 				</Stack>
+				{ view.layout?.actions === 'button' &&
+					!! primaryActions.length && (
+						<div
+							className="dataviews-view-grid__card-actions"
+							onClick={ ( e ) => e.stopPropagation() }
+						>
+							<PrimaryActions
+								item={ item }
+								actions={ primaryActions }
+								registry={ registry }
+								actionsLayout="button"
+							/>
+						</div>
+					) }
 			</Stack>
 		);
 	}

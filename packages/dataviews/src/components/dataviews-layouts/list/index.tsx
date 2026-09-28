@@ -60,10 +60,12 @@ function PrimaryActionGridCell< Item >( {
 	idPrefix,
 	primaryAction,
 	item,
+	actionsLayout = 'text',
 }: {
 	idPrefix: string;
 	primaryAction: Action< Item >;
 	item: Item;
+	actionsLayout?: 'text' | 'button';
 } ) {
 	const registry = useRegistry();
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
@@ -78,6 +80,13 @@ function PrimaryActionGridCell< Item >( {
 			? primaryAction.label
 			: primaryAction.label( [ item ] );
 
+	const computedVariant =
+		actionsLayout === 'button'
+			? primaryAction.variant === 'button-outline'
+				? 'secondary'
+				: 'primary'
+			: undefined;
+
 	return 'RenderModal' in primaryAction ? (
 		<div role="gridcell" key={ primaryAction.id }>
 			<Composite.Item
@@ -88,6 +97,7 @@ function PrimaryActionGridCell< Item >( {
 						accessibleWhenDisabled
 						text={ label }
 						size="small"
+						variant={ computedVariant }
 						onClick={ () => setIsModalOpen( true ) }
 					/>
 				}
@@ -110,6 +120,7 @@ function PrimaryActionGridCell< Item >( {
 						disabled={ !! primaryAction.disabled }
 						accessibleWhenDisabled
 						size="small"
+						variant={ computedVariant }
 						onClick={ () => {
 							primaryAction.callback( [ item ], { registry } );
 						} }
@@ -208,13 +219,16 @@ function ListItem< Item >( {
 		<Stack
 			direction="row"
 			gap="md"
-			className="dataviews-view-list__item-actions"
+			className={ clsx( 'dataviews-view-list__item-actions', {
+				'has-button-actions': view.layout?.actions === 'button',
+			} ) }
 		>
 			{ primaryAction && (
 				<PrimaryActionGridCell
 					idPrefix={ idPrefix }
 					primaryAction={ primaryAction }
 					item={ item }
+					actionsLayout={ view.layout?.actions }
 				/>
 			) }
 			{ ! hasOnlyOnePrimaryAction && (

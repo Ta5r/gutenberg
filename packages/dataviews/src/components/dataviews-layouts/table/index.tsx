@@ -247,7 +247,11 @@ function TableRow< Item >( {
 					} ) }
 					onClick={ ( e ) => e.stopPropagation() }
 				>
-					<ItemActions item={ item } actions={ actions } />
+					<ItemActions
+						item={ item }
+						actions={ actions }
+						actionsLayout={ view.layout?.actions }
+					/>
 				</td>
 			) }
 		</tr>

@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import type { MouseEventHandler } from 'react';
 import { Button, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
@@ -16,6 +17,7 @@ export interface ActionTriggerProps< Item > {
 	isBusy?: boolean;
 	items: Item[];
 	variant?: 'primary' | 'secondary' | 'tertiary' | 'link';
+	actionsLayout?: 'text' | 'button';
 }
 
 export interface ActionModalProps< Item > {
@@ -35,6 +37,7 @@ interface ItemActionsProps< Item > {
 	item: Item;
 	actions: Action< Item >[];
 	isCompact?: boolean;
+	actionsLayout?: 'text' | 'button';
 }
 
 interface CompactItemActionsProps< Item > {
@@ -49,6 +52,7 @@ interface PrimaryActionsProps< Item > {
 	actions: Action< Item >[];
 	registry: ReturnType< typeof useRegistry >;
 	buttonVariant?: 'primary' | 'secondary' | 'tertiary' | 'link';
+	actionsLayout?: 'text' | 'button';
 }
 
 function ButtonTrigger< Item >( {
@@ -56,15 +60,21 @@ function ButtonTrigger< Item >( {
 	onClick,
 	items,
 	variant,
+	actionsLayout,
 }: ActionTriggerProps< Item > ) {
 	const label =
 		typeof action.label === 'string' ? action.label : action.label( items );
+	let computedVariant = variant;
+	if ( actionsLayout === 'button' ) {
+		computedVariant =
+			action.variant === 'button-outline' ? 'secondary' : 'primary';
+	}
 	return (
 		<Button
 			disabled={ !! action.disabled }
 			accessibleWhenDisabled
 			size="compact"
-			variant={ variant }
+			variant={ computedVariant }
 			onClick={ onClick }
 		>
 			{ label }
@@ -164,6 +174,7 @@ export default function ItemActions< Item >( {
 	item,
 	actions,
 	isCompact,
+	actionsLayout = 'text',
 }: ItemActionsProps< Item > ) {
 	const registry = useRegistry();
 	const { primaryActions, eligibleActions } = useMemo( () => {
@@ -198,7 +209,9 @@ export default function ItemActions< Item >( {
 		<Stack
 			direction="row"
 			justify="flex-end"
-			className="dataviews-item-actions"
+			className={ clsx( 'dataviews-item-actions', {
+				'has-button-actions': actionsLayout === 'button',
+			} ) }
 			style={ {
 				flexShrink: 0,
 				width: 'auto',
@@ -208,11 +221,12 @@ export default function ItemActions< Item >( {
 				item={ item }
 				actions={ primaryActions }
 				registry={ registry }
+				actionsLayout={ actionsLayout }
 			/>
 			{ ( primaryActions.length < eligibleActions.length ||
 				// Since we hide primary actions on mobile, we need to show the menu
 				// there if there are any actions at all.
-				isMobileViewport ) && (
+				( actionsLayout !== 'button' && isMobileViewport ) ) && (
 				<CompactItemActions
 					item={ item }
 					actions={ eligibleActions }
@@ -275,11 +289,12 @@ export function PrimaryActions< Item >( {
 	actions,
 	registry,
 	buttonVariant,
+	actionsLayout = 'text',
 }: PrimaryActionsProps< Item > ) {
 	const [ activeModalAction, setActiveModalAction ] = useState( null as any );
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 
-	if ( isMobileViewport ) {
+	if ( actionsLayout !== 'button' && isMobileViewport ) {
 		return null;
 	}
 
@@ -301,6 +316,7 @@ export function PrimaryActions< Item >( {
 					} }
 					items={ [ item ] }
 					variant={ buttonVariant }
+					actionsLayout={ actionsLayout }
 				/>
 			) ) }
 			{ !! activeModalAction && (

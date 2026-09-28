@@ -275,3 +275,16 @@
 	padding: 0 var(--wpds-dimension-padding-2xl);
 	container-type: inline-size;
 }
+
+.dataviews-view-grid__card-actions {
+	margin-top: auto;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-xs);
+
+	.components-button {
+		width: 100%;
+		justify-content: center;
+	}
+}
