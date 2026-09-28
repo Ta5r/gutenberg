@@ -339,7 +339,7 @@ function _gutenberg_get_entity_view_config_posttype_wp_block( $data ) {
 		'perPage'    => 20,
 		'titleField' => 'title',
 		'mediaField' => 'preview',
-		'fields'     => array( 'sync-status' ),
+		'fields'     => array( 'sync-status', 'author' ),
 		'filters'    => array(),
 		'layout'     => $default_layouts['grid']['layout'],
 	);

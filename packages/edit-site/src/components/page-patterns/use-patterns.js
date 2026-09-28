@@ -2,6 +2,7 @@ import { parse } from '@wordpress/blocks';
 import { useSelect, createSelector } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { useMemo } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { filterOutDuplicatesByName } from './utils';
 import {
 	EXCLUDED_PATTERN_SOURCES,
@@ -88,6 +89,13 @@ const selectThemePatterns = createSelector(
 
 		const restBlockPatterns = select( coreStore ).getBlockPatterns();
 
+		const { getCurrentTheme } = select( coreStore );
+		const currentTheme = getCurrentTheme();
+		const themeName =
+			currentTheme?.title?.rendered ||
+			currentTheme?.name ||
+			__( 'Theme' );
+
 		const patterns = [
 			...( blockPatterns || [] ),
 			...( restBlockPatterns || [] ),
@@ -98,14 +106,25 @@ const selectThemePatterns = createSelector(
 			)
 			.filter( filterOutDuplicatesByName )
 			.filter( ( pattern ) => pattern.inserter !== false )
-			.map( ( pattern ) => ( {
-				...pattern,
-				keywords: pattern.keywords || [],
-				type: PATTERN_TYPES.theme,
-				blocks: parse( pattern.content, {
-					__unstableSkipMigrationLogs: true,
-				} ),
-			} ) );
+			.map( ( pattern ) => {
+				const isTheme = ! pattern.source || pattern.source === 'theme';
+				return {
+					...pattern,
+					keywords: pattern.keywords || [],
+					type: PATTERN_TYPES.theme,
+					original_source: isTheme
+						? 'theme'
+						: pattern.source === 'plugin'
+						? 'plugin'
+						: 'site',
+					author_text: isTheme
+						? themeName
+						: pattern.plugin || pattern.source || themeName,
+					blocks: parse( pattern.content, {
+						__unstableSkipMigrationLogs: true,
+					} ),
+				};
+			} );
 		return {
 			patterns,
 			isResolving: isResolvingSelector( 'getBlockPatterns' ),
@@ -115,6 +134,7 @@ const selectThemePatterns = createSelector(
 		select( coreStore ).getBlockPatterns(),
 		select( coreStore ).isResolving( 'getBlockPatterns' ),
 		unlock( select( editSiteStore ) ).getSettings(),
+		select( coreStore ).getCurrentTheme(),
 	]
 );
 
@@ -205,12 +225,25 @@ const selectUserPatterns = createSelector(
 			PATTERN_TYPES.user,
 			query
 		);
+		const users = getEntityRecords( 'root', 'user', {
+			who: 'authors',
+			per_page: -1,
+		} );
 		const userPatternCategories = getUserPatternCategories();
 		const categories = new Map();
 		userPatternCategories.forEach( ( userCategory ) =>
 			categories.set( userCategory.id, userCategory )
 		);
-		let patterns = patternPosts ?? EMPTY_PATTERN_LIST;
+		let patterns = ( patternPosts ?? EMPTY_PATTERN_LIST ).map(
+			( pattern ) => {
+				const user = users?.find( ( u ) => u.id === pattern.author );
+				return {
+					...pattern,
+					original_source: 'user',
+					author_text: user?.name,
+				};
+			}
+		);
 		const isResolving = isResolvingSelector( 'getEntityRecords', [
 			'postType',
 			PATTERN_TYPES.user,
@@ -248,6 +281,10 @@ const selectUserPatterns = createSelector(
 			{ per_page: -1 },
 		] ),
 		select( coreStore ).getUserPatternCategories(),
+		select( coreStore ).getEntityRecords( 'root', 'user', {
+			who: 'authors',
+			per_page: -1,
+		} ),
 	]
 );
 

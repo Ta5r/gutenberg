@@ -102,12 +102,16 @@ export default function DataviewsPatterns() {
 	}, [ postTypeFields ] );
 
 	const { data, paginationInfo } = useMemo( () => {
-		// Search is managed server-side as well as filters for patterns.
-		// However, the author filter in template parts is done client-side.
+		// Search is managed server-side as well as sync-status filter for patterns.
+		// However, author filter for patterns and template parts is done client-side.
 		const viewWithoutFilters = { ...view };
 		delete viewWithoutFilters.search;
 		if ( postType !== TEMPLATE_PART_POST_TYPE ) {
-			viewWithoutFilters.filters = [];
+			// Retain author filter client-side for patterns while excluding sync-status
+			// (which is already applied upstream in usePatterns).
+			viewWithoutFilters.filters = ( view.filters || [] ).filter(
+				( { field } ) => field === 'author'
+			);
 		}
 		return filterSortAndPaginate( patterns, viewWithoutFilters, fields );
 	}, [ patterns, view, fields, postType ] );
