@@ -139,8 +139,16 @@ function makeBlocksSerializable( blocks: Block[] ): Block[] {
 			 * @see import("@wordpress/blocks/src/api/parser").parseRawBlock()
 			 */
 			validationIssues,
+			/*
+			 * Validation state, raw HTML originalContent, and __unstableBlockSource
+			 * are client-local parsing artifacts and must not be synchronized
+			 * over CRDT to other collaborators or persisted into the shared Y.Doc.
+			 */
+			isValid,
+			originalContent,
+			__unstableBlockSource,
 			...rest
-		} = block;
+		} = block as Block & { __unstableBlockSource?: unknown };
 
 		return {
 			...rest,
@@ -239,9 +247,16 @@ function areBlocksEqual( gblock: Block, yblock: YBlock ): boolean {
 
 	// we must not sync clientId, as this can't be generated consistently and
 	// hence will lead to merge conflicts.
+	// We also must not compare client-local validation properties (isValid,
+	// originalContent, __unstableBlockSource, validationIssues) because
+	// validation is evaluated locally in each client's browser environment.
 	const overwrites = {
 		innerBlocks: null,
 		clientId: null,
+		isValid: null,
+		originalContent: null,
+		validationIssues: null,
+		__unstableBlockSource: null,
 	};
 	const res = fastDeepEqual(
 		Object.assign( {}, gblock, overwrites ),
@@ -370,7 +385,17 @@ function createYMapFromQuery(
 function createNewYBlock( block: Block ): YBlock {
 	return createYMap< YBlockRecord >(
 		Object.fromEntries(
-			Object.entries( block ).map( ( [ key, value ] ) => {
+			Object.entries( block )
+				.filter( ( [ key ] ) => {
+					// Client-local validation and parser artifacts must not be synced into CRDT.
+					return ! [
+						'isValid',
+						'originalContent',
+						'validationIssues',
+						'__unstableBlockSource',
+					].includes( key );
+				} )
+				.map( ( [ key, value ] ) => {
 				switch ( key ) {
 					case 'attributes': {
 						return [
@@ -619,6 +644,18 @@ export function mergeCrdtBlocks(
 					}
 
 					default:
+						// Skip client-local validation properties so they are never written to Y.Doc.
+						if (
+							[
+								'isValid',
+								'originalContent',
+								'validationIssues',
+								'__unstableBlockSource',
+							].includes( incomingBlockProperty )
+						) {
+							break;
+						}
+
 						if (
 							! fastDeepEqual(
 								incomingYBlock[ incomingBlockProperty ],
