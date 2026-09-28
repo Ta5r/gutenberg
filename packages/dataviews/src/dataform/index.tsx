@@ -10,12 +10,16 @@ import normalizeForm from '../components/dataform-layouts/normalize-form';
  * of a data item, driven by a fields and form layout configuration. Use it to
  * edit items of a dataset, often alongside `DataViews`.
  */
+const noop = () => {};
+
 export default function DataForm< Item >( {
 	data,
 	form,
 	fields,
-	onChange,
+	onChange = noop,
 	validity,
+	previousData,
+	compareMode = 'inline',
 }: DataFormProps< Item > ) {
 	const normalizedForm = useMemo( () => normalizeForm( form ), [ form ] );
 	const normalizedFields = useMemo(
@@ -28,7 +32,11 @@ export default function DataForm< Item >( {
 	}
 
 	return (
-		<DataFormProvider fields={ normalizedFields }>
+		<DataFormProvider
+			fields={ normalizedFields }
+			previousData={ previousData }
+			compareMode={ compareMode }
+		>
 			<DataFormLayout
 				data={ data }
 				form={ normalizedForm }

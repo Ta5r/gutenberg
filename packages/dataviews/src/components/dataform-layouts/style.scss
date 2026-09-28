@@ -3,3 +3,79 @@
 .dataforms-layouts__wrapper {
 	@include body-medium();
 }
+
+.dataforms-layouts__comparison-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 11px;
+	font-weight: 500;
+	line-height: 1;
+	padding: 2px 6px;
+	border-radius: 4px;
+	vertical-align: middle;
+	margin-inline-start: 6px;
+
+	&-indicator {
+		display: inline-block;
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+	}
+
+	&--added {
+		background-color: rgba(0, 138, 32, 0.1);
+		color: #008a20;
+
+		.dataforms-layouts__comparison-badge-indicator {
+			background-color: #008a20;
+		}
+	}
+
+	&--removed {
+		background-color: rgba(204, 24, 24, 0.1);
+		color: #cc1818;
+
+		.dataforms-layouts__comparison-badge-indicator {
+			background-color: #cc1818;
+		}
+	}
+
+	&--modified {
+		background-color: rgba(189, 134, 0, 0.1);
+		color: #996800;
+
+		.dataforms-layouts__comparison-badge-indicator {
+			background-color: #bd8600;
+		}
+	}
+}
+
+.dataforms-layouts__comparison-side-by-side {
+	display: flex;
+	gap: 16px;
+	align-items: flex-start;
+
+	.dataforms-layouts__comparison-previous,
+	.dataforms-layouts__comparison-current {
+		flex: 1;
+	}
+
+	.dataforms-layouts__comparison-previous {
+		opacity: 0.75;
+		text-decoration: line-through;
+	}
+}
+
+.dataforms-layouts__comparison-stacked {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+
+	.dataforms-layouts__comparison-previous {
+		opacity: 0.75;
+		font-size: 12px;
+		text-decoration: line-through;
+	}
+}
+

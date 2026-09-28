@@ -14,6 +14,8 @@ import DataFormContext from '../../dataform-context';
 import { canRenderField } from '../can-render-field';
 import { DataFormLayout } from '../data-form-layout';
 import { DEFAULT_LAYOUT } from '../normalize-form';
+import { getFieldComparisonStatus } from '../../../dataform/comparison-utils';
+import { FieldComparisonBadge } from '../field-comparison-badge';
 
 function Header( { title }: { title: string } ) {
 	return (
@@ -39,7 +41,7 @@ export default function FormRegularField< Item >( {
 	markWhenOptional,
 	validity,
 }: FieldLayoutProps< Item > ) {
-	const { fields } = useContext( DataFormContext );
+	const { fields, previousData, compareMode } = useContext( DataFormContext );
 	const layout = field.layout as NormalizedRegularLayout;
 
 	const form: NormalizedForm = useMemo(
@@ -75,6 +77,83 @@ export default function FormRegularField< Item >( {
 		return null;
 	}
 
+	const isComparing = previousData !== undefined;
+	const comparisonStatus = isComparing
+		? getFieldComparisonStatus( fieldDefinition, data, previousData )
+		: 'unchanged';
+
+	const renderControl = () => {
+		if ( isComparing ) {
+			if ( compareMode === 'side-by-side' ) {
+				return (
+					<div className="dataforms-layouts__comparison-side-by-side">
+						<div className="dataforms-layouts__comparison-previous">
+							<fieldDefinition.render
+								item={ previousData }
+								field={ fieldDefinition }
+							/>
+						</div>
+						<div className="dataforms-layouts__comparison-current">
+							<fieldDefinition.render
+								item={ data }
+								field={ fieldDefinition }
+							/>
+						</div>
+					</div>
+				);
+			}
+
+			if ( compareMode === 'stacked' ) {
+				return (
+					<div className="dataforms-layouts__comparison-stacked">
+						<div className="dataforms-layouts__comparison-previous">
+							<fieldDefinition.render
+								item={ previousData }
+								field={ fieldDefinition }
+							/>
+						</div>
+						<div className="dataforms-layouts__comparison-current">
+							<fieldDefinition.render
+								item={ data }
+								field={ fieldDefinition }
+							/>
+						</div>
+					</div>
+				);
+			}
+
+			return (
+				<fieldDefinition.render
+					item={ data }
+					field={ fieldDefinition }
+				/>
+			);
+		}
+
+		if ( fieldDefinition.readOnly === true ) {
+			return (
+				<fieldDefinition.render
+					item={ data }
+					field={ fieldDefinition }
+				/>
+			);
+		}
+
+		return (
+			fieldDefinition.Edit && (
+				<fieldDefinition.Edit
+					key={ fieldDefinition.id }
+					data={ data }
+					field={ fieldDefinition }
+					onChange={ onChange }
+					hideLabelFromVision={ labelPosition === 'side' ? true : ( labelPosition === 'none' ? true : hideLabelFromVision ) }
+					markWhenOptional={ markWhenOptional }
+					validity={ validity }
+				/>
+			)
+		);
+	};
+
 	if ( labelPosition === 'side' ) {
 		return (
 			<Stack
@@ -90,27 +169,15 @@ export default function FormRegularField< Item >( {
 				>
 					<BaseControl.VisualLabel>
 						{ fieldDefinition.label }
+						{ isComparing && (
+							<FieldComparisonBadge
+								status={ comparisonStatus }
+							/>
+						) }
 					</BaseControl.VisualLabel>
 				</div>
 				<div className="dataforms-layouts-regular__field-control">
-					{ fieldDefinition.readOnly === true ? (
-						<fieldDefinition.render
-							item={ data }
-							field={ fieldDefinition }
-						/>
-					) : (
-						fieldDefinition.Edit && (
-							<fieldDefinition.Edit
-								key={ fieldDefinition.id }
-								data={ data }
-								field={ fieldDefinition }
-								onChange={ onChange }
-								hideLabelFromVision
-								markWhenOptional={ markWhenOptional }
-								validity={ validity }
-							/>
-						)
-					) }
+					{ renderControl() }
 				</div>
 			</Stack>
 		);
@@ -118,36 +185,17 @@ export default function FormRegularField< Item >( {
 
 	return (
 		<div className="dataforms-layouts-regular__field">
-			{ fieldDefinition.readOnly === true ? (
-				<>
-					<>
-						{ ! hideLabelFromVision && labelPosition !== 'none' && (
-							<BaseControl.VisualLabel>
-								{ fieldDefinition.label }
-							</BaseControl.VisualLabel>
-						) }
-						<fieldDefinition.render
-							item={ data }
-							field={ fieldDefinition }
-						/>
-					</>
-				</>
-			) : (
-				fieldDefinition.Edit && (
-					<fieldDefinition.Edit
-						data={ data }
-						field={ fieldDefinition }
-						onChange={ onChange }
-						hideLabelFromVision={
-							labelPosition === 'none'
-								? true
-								: hideLabelFromVision
-						}
-						markWhenOptional={ markWhenOptional }
-						validity={ validity }
-					/>
-				)
+			{ ! hideLabelFromVision && labelPosition !== 'none' && (
+				<BaseControl.VisualLabel>
+					{ fieldDefinition.label }
+					{ isComparing && (
+						<FieldComparisonBadge status={ comparisonStatus } />
+					) }
+				</BaseControl.VisualLabel>
 			) }
+			<div className="dataforms-layouts-regular__field-control">
+				{ renderControl() }
+			</div>
 		</div>
 	);
 }
