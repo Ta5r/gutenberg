@@ -453,6 +453,8 @@ class MediaUpload extends Component {
 			return;
 		}
 
+		invalidateAttachmentResolutions( { select, dispatch } );
+
 		if ( multiple ) {
 			onSelect(
 				selectedImages.models.map( ( model ) =>
@@ -466,6 +468,10 @@ class MediaUpload extends Component {
 
 	onSelect() {
 		const { onSelect, multiple = false } = this.props;
+		// Invalidate cached attachment resolutions so in-place edits (e.g. crop)
+		// immediately trigger re-fetching across subscribers.
+		invalidateAttachmentResolutions( { select, dispatch } );
+
 		// Get media attachment details from the frame state.
 		const attachment = this.frame.state().get( 'selection' ).toJSON();
 		onSelect( multiple ? attachment : attachment[ 0 ] );

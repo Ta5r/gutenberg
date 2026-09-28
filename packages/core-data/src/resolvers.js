@@ -315,9 +315,16 @@ export const getEntityRecord =
 		}
 	};
 
-// Whenever a template is saved, the active templates might be updated, so
-// invalidate the site settings when a template is updated or deleted.
 getEntityRecord.shouldInvalidate = ( action, kind, name ) => {
+	if (
+		( action.type === 'RECEIVE_ITEMS' || action.type === 'REMOVE_ITEMS' ) &&
+		action.invalidateCache &&
+		kind === action.kind &&
+		name === action.name
+	) {
+		return true;
+	}
+
 	return (
 		kind === 'root' &&
 		name === 'site' &&
