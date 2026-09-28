@@ -538,4 +538,40 @@ class WP_Navigation_Block_Renderer_Test extends WP_UnitTestCase {
 		);
 		$this->assertNotContains( $view_module, wp_script_modules()->get_queue(), 'A navigation without submenus should not enqueue the view module because a previous navigation had a submenu.' );
 	}
+
+	/**
+	 * Test that nested or re-entrant navigation blocks do not clobber
+	 * outer navigation block submenu detection.
+	 *
+	 * @group navigation-renderer
+	 *
+	 * @covers WP_Navigation_Block_Renderer::has_submenus
+	 *
+	 * @see https://github.com/WordPress/gutenberg/issues/82288
+	 */
+	public function test_nested_navigation_blocks_do_not_clobber_outer_submenu_detection() {
+		$view_module = '@wordpress/block-library/navigation/view';
+		wp_dequeue_script_module( $view_module );
+
+		// Outer navigation has a submenu and showSubmenuIcon=true (interactive).
+		// An inner navigation without submenus is rendered inside.
+		$output = do_blocks(
+			'<!-- wp:navigation {"showSubmenuIcon":true,"overlayMenu":"never"} -->' .
+			'<!-- wp:navigation-submenu {"label":"Parent","url":"/parent"} -->' .
+			'<!-- wp:navigation-link {"label":"Child","url":"/child"} /-->' .
+			'<!-- /wp:navigation-submenu -->' .
+			'<!-- wp:group -->' .
+			'<!-- wp:navigation {"showSubmenuIcon":false,"openSubmenusOnClick":false,"overlayMenu":"never"} -->' .
+			'<!-- wp:navigation-link {"label":"Inner Plain","url":"/inner"} /-->' .
+			'<!-- /wp:navigation -->' .
+			'<!-- /wp:group -->' .
+			'<!-- /wp:navigation -->'
+		);
+
+		$this->assertContains(
+			$view_module,
+			wp_script_modules()->get_queue(),
+			'Outer interactive navigation with a submenu should retain its interactive view module even when an inner submenu-free navigation is rendered.'
+		);
+	}
 }
