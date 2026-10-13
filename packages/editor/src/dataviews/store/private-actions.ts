@@ -57,6 +57,7 @@ import {
 	descriptionField as mediaDescriptionField,
 	filenameField,
 	filesizeField,
+	focalPointField,
 	mediaDimensionsField,
 	mimeTypeField,
 } from '@wordpress/media-fields';
@@ -157,6 +158,7 @@ const ORDERED_MEDIA_FIELDS = [
 	filesizeField,
 	mediaDimensionsField,
 	attachedToField,
+	focalPointField,
 	// Regular layout fields (always visible).
 	titleField,
 	altTextField,

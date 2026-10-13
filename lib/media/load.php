@@ -94,6 +94,34 @@ function gutenberg_media_processing_register_rest_fields(): void {
 			'get_callback' => 'gutenberg_rest_get_attachment_filesize',
 		)
 	);
+
+	register_rest_field(
+		'attachment',
+		'focal_point',
+		array(
+			'schema'          => array(
+				'description' => __( 'Focal point coordinates for the attachment image (percentages as decimals between 0 and 1).', 'gutenberg' ),
+				'type'        => array( 'object', 'null' ),
+				'context'     => array( 'view', 'edit' ),
+				'properties'  => array(
+					'x' => array(
+						'type'        => 'number',
+						'minimum'     => 0,
+						'maximum'     => 1,
+						'description' => __( 'Horizontal focal point coordinate (0 = left, 1 = right).', 'gutenberg' ),
+					),
+					'y' => array(
+						'type'        => 'number',
+						'minimum'     => 0,
+						'maximum'     => 1,
+						'description' => __( 'Vertical focal point coordinate (0 = top, 1 = bottom).', 'gutenberg' ),
+					),
+				),
+			),
+			'get_callback'    => 'gutenberg_rest_get_attachment_focal_point',
+			'update_callback' => 'gutenberg_rest_update_attachment_focal_point',
+		)
+	);
 }
 
 add_action( 'rest_api_init', 'gutenberg_media_processing_register_rest_fields' );
@@ -144,6 +172,143 @@ function gutenberg_rest_get_attachment_filesize( array $post ): ?int {
 
 	return null;
 }
+
+/**
+ * Returns the attachment's focal point coordinates.
+ *
+ * @param array $post Post data.
+ * @return array{x: float, y: float}|null Focal point coordinates, or null if unset.
+ */
+function gutenberg_rest_get_attachment_focal_point( array $post ): ?array {
+	return gutenberg_get_attachment_focal_point( (int) $post['id'] );
+}
+
+/**
+ * Returns the attachment's focal point coordinates.
+ *
+ * @param int $attachment_id Attachment ID.
+ * @return array{x: float, y: float}|null Focal point coordinates, or null if unset.
+ */
+function gutenberg_get_attachment_focal_point( int $attachment_id ): ?array {
+	$focal_point = get_post_meta( $attachment_id, '_wp_attachment_focal_point', true );
+
+	if ( ! is_array( $focal_point ) || ! isset( $focal_point['x'], $focal_point['y'] ) ) {
+		return null;
+	}
+
+	$x = (float) $focal_point['x'];
+	$y = (float) $focal_point['y'];
+
+	// Clamp to 0..1 range.
+	$x = max( 0.0, min( 1.0, $x ) );
+	$y = max( 0.0, min( 1.0, $y ) );
+
+	return array(
+		'x' => $x,
+		'y' => $y,
+	);
+}
+
+/**
+ * Updates the attachment's focal point coordinates.
+ *
+ * @param mixed   $value Value received in REST request.
+ * @param WP_Post $post  Attachment post object.
+ * @return bool|WP_Error True on success, or WP_Error on failure.
+ */
+function gutenberg_rest_update_attachment_focal_point( $value, WP_Post $post ) {
+	if ( null === $value || '' === $value ) {
+		delete_post_meta( $post->ID, '_wp_attachment_focal_point' );
+		return true;
+	}
+
+	if ( ! is_array( $value ) || ! isset( $value['x'], $value['y'] ) ) {
+		return new WP_Error(
+			'rest_invalid_focal_point',
+			__( 'Focal point must be an object containing numeric x and y coordinates.', 'gutenberg' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	$x = (float) $value['x'];
+	$y = (float) $value['y'];
+
+	if ( $x < 0 || $x > 1 || $y < 0 || $y > 1 ) {
+		return new WP_Error(
+			'rest_invalid_focal_point_range',
+			__( 'Focal point coordinates must be between 0 and 1.', 'gutenberg' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	update_post_meta(
+		$post->ID,
+		'_wp_attachment_focal_point',
+		array(
+			'x' => $x,
+			'y' => $y,
+		)
+	);
+
+	return true;
+}
+
+/**
+ * Registers the attachment focal point post meta.
+ */
+function gutenberg_register_attachment_focal_point_meta(): void {
+	register_post_meta(
+		'attachment',
+		'_wp_attachment_focal_point',
+		array(
+			'show_in_rest'  => false, // Handled via register_rest_field with custom validation.
+			'single'        => true,
+			'type'          => 'object',
+			'auth_callback' => static function ( bool $allowed, string $meta_key, int $post_id ): bool {
+				return current_user_can( 'edit_post', $post_id );
+			},
+		)
+	);
+}
+
+add_action( 'init', 'gutenberg_register_attachment_focal_point_meta' );
+
+/**
+ * Adds focal point coordinates as CSS and data attributes to attachment images.
+ *
+ * @param array        $attr       Attributes for the image markup.
+ * @param WP_Post      $attachment Attachment post object.
+ * @param string|int[] $size       Requested image size.
+ * @return array Modified image attributes.
+ */
+function gutenberg_filter_attachment_image_attributes( array $attr, WP_Post $attachment, $size ): array {
+	$focal_point = gutenberg_get_attachment_focal_point( $attachment->ID );
+
+	if ( ! $focal_point ) {
+		return $attr;
+	}
+
+	$x_pct = round( $focal_point['x'] * 100 );
+	$y_pct = round( $focal_point['y'] * 100 );
+
+	// Expose data attributes for custom CSS / JS scripts or blocks.
+	$attr['data-focal-point-x'] = (string) $focal_point['x'];
+	$attr['data-focal-point-y'] = (string) $focal_point['y'];
+
+	// Expose CSS custom properties and object-position style if object-position is not already defined.
+	$style_declarations = "--wp--focal-point-x: {$x_pct}%; --wp--focal-point-y: {$y_pct}%;";
+	if ( empty( $attr['style'] ) || false === strpos( $attr['style'], 'object-position' ) ) {
+		$style_declarations .= " object-position: {$x_pct}% {$y_pct}%;";
+	}
+
+	$attr['style'] = ! empty( $attr['style'] )
+		? rtrim( $attr['style'], '; ' ) . '; ' . $style_declarations
+		: $style_declarations;
+
+	return $attr;
+}
+
+add_filter( 'wp_get_attachment_image_attributes', 'gutenberg_filter_attachment_image_attributes', 10, 3 );
 
 /**
  * Returns a list of all available image sizes.

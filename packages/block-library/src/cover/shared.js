@@ -70,6 +70,7 @@ export function attributesFromMedia( media ) {
 		id: media.id,
 		alt: media?.alt,
 		backgroundType: mediaType,
+		...( media?.focal_point ? { focalPoint: media.focal_point } : {} ),
 		...( mediaType === VIDEO_BACKGROUND_TYPE
 			? { hasParallax: undefined }
 			: {} ),

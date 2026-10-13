@@ -7,6 +7,7 @@ export { default as dateModifiedField } from './date_modified';
 export { default as descriptionField } from './description';
 export { default as filenameField } from './filename';
 export { default as filesizeField } from './filesize';
+export { default as focalPointField } from './focal_point';
 export { default as mediaDimensionsField } from './media_dimensions';
 export { default as mediaThumbnailField } from './media_thumbnail';
 export { default as mimeTypeField } from './mime_type';
