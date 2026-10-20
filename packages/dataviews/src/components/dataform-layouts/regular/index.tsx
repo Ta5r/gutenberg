@@ -61,6 +61,7 @@ export default function FormRegularField< Item >( {
 					form={ form }
 					onChange={ onChange }
 					validity={ validity?.children }
+					className={ field.className }
 				/>
 			</>
 		);
@@ -79,7 +80,11 @@ export default function FormRegularField< Item >( {
 		return (
 			<Stack
 				direction="row"
-				className="dataforms-layouts-regular__field"
+				className={ clsx(
+					'dataforms-layouts-regular__field',
+					field.className,
+					layout.grow && 'dataforms-layouts-regular__field--grow'
+				) }
 				gap="sm"
 			>
 				<div
@@ -117,7 +122,13 @@ export default function FormRegularField< Item >( {
 	}
 
 	return (
-		<div className="dataforms-layouts-regular__field">
+		<div
+			className={ clsx(
+				'dataforms-layouts-regular__field',
+				field.className,
+				layout.grow && 'dataforms-layouts-regular__field--grow'
+			) }
+		>
 			{ fieldDefinition.readOnly === true ? (
 				<>
 					<>

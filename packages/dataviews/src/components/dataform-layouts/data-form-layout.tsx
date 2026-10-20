@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { useContext, useMemo } from '@wordpress/element';
 import { Stack } from '@wordpress/ui';
 import type {
@@ -5,12 +6,24 @@ import type {
 	FormValidity,
 	NormalizedForm,
 	NormalizedFormField,
+	NormalizedLayout,
+	NormalizedRegularLayout,
 } from '../../types';
 import { getFormFieldLayout } from './index';
 import DataFormContext from '../dataform-context';
 
-const DEFAULT_WRAPPER = ( { children }: { children: React.ReactNode } ) => (
-	<Stack direction="column" className="dataforms-layouts__wrapper" gap="lg">
+const DEFAULT_WRAPPER = ( {
+	children,
+	className,
+}: {
+	children: React.ReactNode;
+	className?: string;
+} ) => (
+	<Stack
+		direction="column"
+		className={ clsx( 'dataforms-layouts__wrapper', className ) }
+		gap="lg"
+	>
 		{ children }
 	</Stack>
 );
@@ -22,6 +35,7 @@ export function DataFormLayout< Item >( {
 	validity,
 	children,
 	as,
+	className,
 }: {
 	data: Item;
 	form: NormalizedForm;
@@ -40,7 +54,12 @@ export function DataFormLayout< Item >( {
 		childFieldValidity?: FieldValidity,
 		markWhenOptional?: boolean
 	) => React.JSX.Element;
-	as?: React.ComponentType< { children: React.ReactNode } >;
+	as?: React.ComponentType< {
+		children: React.ReactNode;
+		layout?: NormalizedLayout;
+		className?: string;
+	} >;
+	className?: string;
 } ) {
 	const { fields: fieldDefinitions } = useContext( DataFormContext );
 
@@ -60,13 +79,33 @@ export function DataFormLayout< Item >( {
 		);
 	}
 
+	const hasGrowingField = useMemo( () => {
+		if (
+			form.layout.type === 'regular' &&
+			( form.layout as NormalizedRegularLayout ).grow
+		) {
+			return true;
+		}
+		return form.fields.some(
+			( f ) =>
+				f.layout.type === 'regular' &&
+				( f.layout as NormalizedRegularLayout ).grow
+		);
+	}, [ form ] );
+
 	const Wrapper =
 		as ??
 		getFormFieldLayout( form.layout.type )?.wrapper ??
 		DEFAULT_WRAPPER;
 
 	return (
-		<Wrapper layout={ form.layout }>
+		<Wrapper
+			layout={ form.layout }
+			className={ clsx(
+				className,
+				hasGrowingField && 'dataforms-layouts__wrapper--grow'
+			) }
+		>
 			{ form.fields.map( ( formField ) => {
 				const FieldLayout = getFormFieldLayout(
 					formField.layout.type

@@ -36,16 +36,22 @@ const normalizeCardSummaryField = (
 /**
  * Normalizes a layout configuration based on its type.
  *
- * @param layout The layout object to normalize.
+ * @param layout      The layout object to normalize.
+ * @param defaultGrow Optional default grow value when layout is regular.
  * @return The normalized layout object.
  */
-function normalizeLayout( layout?: Layout ): NormalizedLayout {
+function normalizeLayout(
+	layout?: Layout,
+	defaultGrow?: boolean
+): NormalizedLayout {
 	let normalizedLayout = DEFAULT_LAYOUT;
 
 	if ( layout?.type === 'regular' ) {
+		const grow = layout?.grow ?? defaultGrow;
 		normalizedLayout = {
 			type: 'regular',
 			labelPosition: layout?.labelPosition ?? 'top',
+			...( grow !== undefined && { grow } ),
 		} satisfies NormalizedRegularLayout;
 	} else if ( layout?.type === 'panel' ) {
 		const summary = layout.summary ?? [];
@@ -135,13 +141,37 @@ function normalizeForm( form: Form ): NormalizedForm {
 				} satisfies NormalizedFormField;
 			}
 
-			const fieldLayout = field.layout
-				? normalizeLayout( field.layout )
-				: normalizedFormLayout;
+			const defaultFieldGrow =
+				field.grow ??
+				( normalizedFormLayout.type === 'regular'
+					? normalizedFormLayout.grow
+					: undefined );
+
+			let fieldLayout: NormalizedLayout;
+			if ( field.layout ) {
+				fieldLayout = normalizeLayout( field.layout, defaultFieldGrow );
+			} else if (
+				field.grow !== undefined &&
+				normalizedFormLayout.type === 'regular'
+			) {
+				fieldLayout = {
+					...normalizedFormLayout,
+					grow: field.grow,
+				};
+			} else {
+				fieldLayout = normalizedFormLayout;
+			}
+
+			let isGrow: boolean | undefined = field.grow;
+			if ( isGrow === undefined && fieldLayout.type === 'regular' ) {
+				isGrow = fieldLayout.grow;
+			}
 
 			return {
 				id: field.id,
 				layout: fieldLayout,
+				...( isGrow !== undefined && { grow: isGrow } ),
+				...( !! field.className && { className: field.className } ),
 				...( !! field.label && { label: field.label } ),
 				...( !! field.description && {
 					description: field.description,

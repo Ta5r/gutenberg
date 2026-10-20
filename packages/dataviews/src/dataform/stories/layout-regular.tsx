@@ -318,9 +318,11 @@ const getLayoutFromStoryArgs = ( {
 const LayoutRegularComponent = ( {
 	labelPosition,
 	disabled = false,
+	growDescriptionField = false,
 }: {
 	labelPosition: 'default' | 'top' | 'side' | 'none';
 	disabled?: boolean;
+	growDescriptionField?: boolean;
 } ) => {
 	const [ post, setPost ] = useState( {
 		title: 'Hello, World!',
@@ -376,25 +378,41 @@ const LayoutRegularComponent = ( {
 				'dimensions',
 				'file_type',
 				'tags',
-				'description',
+				growDescriptionField
+					? { id: 'description', grow: true }
+					: 'description',
 				'longDescription',
 			],
 		} ),
-		[ labelPosition ]
+		[ labelPosition, growDescriptionField ]
 	);
 
 	return (
-		<DataForm< SamplePost >
-			data={ post }
-			fields={ _fields }
-			form={ form }
-			onChange={ ( edits ) =>
-				setPost( ( prev ) => ( {
-					...prev,
-					...edits,
-				} ) )
+		<div
+			style={
+				growDescriptionField
+					? {
+							height: '600px',
+							display: 'flex',
+							flexDirection: 'column',
+							border: '1px dashed #ccc',
+							padding: '16px',
+						}
+					: undefined
 			}
-		/>
+		>
+			<DataForm< SamplePost >
+				data={ post }
+				fields={ _fields }
+				form={ form }
+				onChange={ ( edits ) =>
+					setPost( ( prev ) => ( {
+						...prev,
+						...edits,
+					} ) )
+				}
+			/>
+		</div>
 	);
 };
 

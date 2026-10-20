@@ -923,6 +923,10 @@ return (
 );
 ```
 
+#### `className`: `string`
+
+Additional CSS class name to apply to the form wrapper element. Optional.
+
 ### validity
 
 Object that determines the validation status of each field. There's a `useFormValidity` hook that can be used to create the validity object — see the utility below. This section documents the `validity` object in case you want to create it via other means.
@@ -2231,6 +2235,7 @@ Represents the type of layout used to render the field. It'll be one of Regular,
 
 -   `type`: `regular`. Required.
 -   `labelPosition`: one of `side`, `top`, or `none`. Optional. `top` by default.
+-   `grow`: boolean. Optional. `false` by default. Whether the field should grow to fill the available vertical space in its container.
 
 For example:
 
@@ -2398,6 +2403,21 @@ Example:
 	children: [ 'field1', 'field2' ],
 }
 ```
+
+### `grow`
+
+Whether the field should grow to fill the available vertical space in its container when using the `regular` layout. Shorthand for setting `grow: true` in the field's `layout`.
+
+-   Type: `boolean`.
+-   Optional.
+-   Default: `false`.
+
+### `className`
+
+Custom CSS class name applied directly to the field element.
+
+-   Type: `string`.
+-   Optional.
 
 ## Contributing to this package
 

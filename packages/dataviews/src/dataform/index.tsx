@@ -16,6 +16,7 @@ export default function DataForm< Item >( {
 	fields,
 	onChange,
 	validity,
+	className,
 }: DataFormProps< Item > ) {
 	const normalizedForm = useMemo( () => normalizeForm( form ), [ form ] );
 	const normalizedFields = useMemo(
@@ -34,6 +35,7 @@ export default function DataForm< Item >( {
 				form={ normalizedForm }
 				onChange={ onChange }
 				validity={ validity }
+				className={ className }
 			/>
 		</DataFormProvider>
 	);

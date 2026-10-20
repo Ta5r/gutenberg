@@ -42,6 +42,12 @@ export type RegularLayout = {
 	 * The position of the field's label. Defaults to `top`.
 	 */
 	labelPosition?: LabelPosition;
+
+	/**
+	 * Whether the field (or fields) should grow to fill available vertical space
+	 * in the form container. Defaults to `false`.
+	 */
+	grow?: boolean;
 };
 
 /**
@@ -57,6 +63,12 @@ export type NormalizedRegularLayout = {
 	 * The position of the field's label.
 	 */
 	labelPosition: LabelPosition;
+
+	/**
+	 * Whether the field should grow to fill available vertical space
+	 * in the form container.
+	 */
+	grow?: boolean;
 };
 
 /**
@@ -455,6 +467,17 @@ export type FormField = {
 	 * or a plain field id.
 	 */
 	children?: Array< FormField | string >;
+
+	/**
+	 * Whether the field should grow to fill available vertical space
+	 * when using the `regular` layout. Shorthand for configuring `grow` on `layout`.
+	 */
+	grow?: boolean;
+
+	/**
+	 * Additional class name to add to the field element.
+	 */
+	className?: string;
 };
 
 /**
@@ -486,6 +509,17 @@ export type NormalizedFormField = {
 	 * Child fields, for layouts that group fields together.
 	 */
 	children?: NormalizedFormField[];
+
+	/**
+	 * Whether the field should grow to fill available vertical space
+	 * when using the `regular` layout.
+	 */
+	grow?: boolean;
+
+	/**
+	 * Additional class name to add to the field element.
+	 */
+	className?: string;
 };
 
 /**
@@ -554,6 +588,11 @@ export interface DataFormProps< Item > {
 	 * The validity state of the form's fields, keyed by field id.
 	 */
 	validity?: FormValidity;
+
+	/**
+	 * Additional class name to add to the form wrapper element.
+	 */
+	className?: string;
 }
 
 /**

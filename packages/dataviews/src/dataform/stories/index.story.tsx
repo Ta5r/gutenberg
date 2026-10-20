@@ -113,9 +113,14 @@ export const LayoutRegular = {
 			control: { type: 'boolean' },
 			description: 'Disable all fields in the form.',
 		},
+		growDescriptionField: {
+			control: { type: 'boolean' },
+			description: 'Enable vertical growth for the description field.',
+		},
 	},
 	args: {
 		disabled: false,
+		growDescriptionField: false,
 	},
 };
 

@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { Stack } from '@wordpress/ui';
 import type { NormalizedLayout, NormalizedRowLayout } from '../../types';
 import FormRegularField from './regular';
@@ -10,10 +11,16 @@ const FORM_FIELD_LAYOUTS = [
 	{
 		type: 'regular',
 		component: FormRegularField,
-		wrapper: ( { children }: { children: React.ReactNode } ) => (
+		wrapper: ( {
+			children,
+			className,
+		}: {
+			children: React.ReactNode;
+			className?: string;
+		} ) => (
 			<Stack
 				direction="column"
-				className="dataforms-layouts__wrapper"
+				className={ clsx( 'dataforms-layouts__wrapper', className ) }
 				gap="lg"
 			>
 				{ children }
@@ -23,10 +30,16 @@ const FORM_FIELD_LAYOUTS = [
 	{
 		type: 'panel',
 		component: FormPanelField,
-		wrapper: ( { children }: { children: React.ReactNode } ) => (
+		wrapper: ( {
+			children,
+			className,
+		}: {
+			children: React.ReactNode;
+			className?: string;
+		} ) => (
 			<Stack
 				direction="column"
-				className="dataforms-layouts__wrapper"
+				className={ clsx( 'dataforms-layouts__wrapper', className ) }
 				gap="md"
 			>
 				{ children }
@@ -36,10 +49,16 @@ const FORM_FIELD_LAYOUTS = [
 	{
 		type: 'card',
 		component: FormCardField,
-		wrapper: ( { children }: { children: React.ReactNode } ) => (
+		wrapper: ( {
+			children,
+			className,
+		}: {
+			children: React.ReactNode;
+			className?: string;
+		} ) => (
 			<Stack
 				direction="column"
-				className="dataforms-layouts__wrapper"
+				className={ clsx( 'dataforms-layouts__wrapper', className ) }
 				gap="xl"
 			>
 				{ children }
@@ -52,13 +71,15 @@ const FORM_FIELD_LAYOUTS = [
 		wrapper: ( {
 			children,
 			layout,
+			className,
 		}: {
 			children: React.ReactNode;
 			layout: NormalizedLayout;
+			className?: string;
 		} ) => (
 			<Stack
 				direction="column"
-				className="dataforms-layouts__wrapper"
+				className={ clsx( 'dataforms-layouts__wrapper', className ) }
 				gap="lg"
 			>
 				<div className="dataforms-layouts-row__field">

@@ -668,4 +668,114 @@ describe( 'normalizeFormFields', () => {
 			} );
 		} );
 	} );
+
+	describe( 'grow and className options', () => {
+		it( 'normalizes regular layout with grow: true on form layout', () => {
+			const form: Form = {
+				layout: {
+					type: 'regular',
+					grow: true,
+				},
+				fields: [ 'field1', { id: 'field2', grow: false } ],
+			};
+			const result = normalizeForm( form );
+			expect( result ).toStrictEqual( {
+				layout: {
+					type: 'regular',
+					labelPosition: 'top',
+					grow: true,
+				},
+				fields: [
+					{
+						id: 'field1',
+						layout: {
+							type: 'regular',
+							labelPosition: 'top',
+							grow: true,
+						},
+					},
+					{
+						id: 'field2',
+						grow: false,
+						layout: {
+							type: 'regular',
+							labelPosition: 'top',
+							grow: false,
+						},
+					},
+				],
+			} );
+		} );
+
+		it( 'normalizes field-level layout with grow: true', () => {
+			const form: Form = {
+				fields: [
+					'field1',
+					{
+						id: 'field2',
+						layout: {
+							type: 'regular',
+							grow: true,
+						},
+					},
+				],
+			};
+			const result = normalizeForm( form );
+			expect( result ).toStrictEqual( {
+				layout: {
+					type: 'regular',
+					labelPosition: 'top',
+				},
+				fields: [
+					{
+						id: 'field1',
+						layout: {
+							type: 'regular',
+							labelPosition: 'top',
+						},
+					},
+					{
+						id: 'field2',
+						grow: true,
+						layout: {
+							type: 'regular',
+							labelPosition: 'top',
+							grow: true,
+						},
+					},
+				],
+			} );
+		} );
+
+		it( 'normalizes field-level shorthand grow and className', () => {
+			const form: Form = {
+				fields: [
+					{
+						id: 'field1',
+						grow: true,
+						className: 'my-custom-field',
+					},
+				],
+			};
+			const result = normalizeForm( form );
+			expect( result ).toStrictEqual( {
+				layout: {
+					type: 'regular',
+					labelPosition: 'top',
+				},
+				fields: [
+					{
+						id: 'field1',
+						grow: true,
+						className: 'my-custom-field',
+						layout: {
+							type: 'regular',
+							labelPosition: 'top',
+							grow: true,
+						},
+					},
+				],
+			} );
+		} );
+	} );
 } );

@@ -376,6 +376,105 @@ describe( 'DataForm component', () => {
 				screen.getByText( "Title and author's name" )
 			).toBeInTheDocument();
 		} );
+
+		it( 'should apply className to form wrapper', () => {
+			const { container } = render(
+				<Dataform
+					onChange={ noop }
+					fields={ fields }
+					form={ form }
+					data={ data }
+					className="my-custom-form"
+				/>
+			);
+
+			const wrapper =
+				// eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+				container.querySelector( '.dataforms-layouts__wrapper' );
+			expect( wrapper ).toHaveClass( 'my-custom-form' );
+		} );
+
+		it( 'should apply grow modifier to form wrapper and field when field has grow: true', () => {
+			const { container } = render(
+				<Dataform
+					onChange={ noop }
+					fields={ fields }
+					form={ {
+						fields: [ 'title', { id: 'order', grow: true } ],
+					} }
+					data={ data }
+				/>
+			);
+
+			const wrapper =
+				// eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+				container.querySelector( '.dataforms-layouts__wrapper' );
+			expect( wrapper ).toHaveClass( 'dataforms-layouts__wrapper--grow' );
+
+			const fieldRows =
+				// eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+				container.querySelectorAll(
+					'.dataforms-layouts-regular__field'
+				);
+			expect( fieldRows[ 0 ] ).not.toHaveClass(
+				'dataforms-layouts-regular__field--grow'
+			);
+			expect( fieldRows[ 1 ] ).toHaveClass(
+				'dataforms-layouts-regular__field--grow'
+			);
+		} );
+
+		it( 'should apply custom className to field element', () => {
+			const { container } = render(
+				<Dataform
+					onChange={ noop }
+					fields={ fields }
+					form={ {
+						fields: [
+							{
+								id: 'title',
+								className: 'custom-title-field',
+							},
+						],
+					} }
+					data={ data }
+				/>
+			);
+
+			const fieldRow =
+				// eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+				container.querySelector( '.dataforms-layouts-regular__field' );
+			expect( fieldRow ).toHaveClass( 'custom-title-field' );
+		} );
+
+		it( 'should apply grow modifier when form.layout has grow: true', () => {
+			const { container } = render(
+				<Dataform
+					onChange={ noop }
+					fields={ fields }
+					form={ {
+						layout: {
+							type: 'regular',
+							grow: true,
+						},
+						fields: [ 'title' ],
+					} }
+					data={ data }
+				/>
+			);
+
+			const wrapper =
+				// eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+				container.querySelector( '.dataforms-layouts__wrapper' );
+			expect( wrapper ).toHaveClass( 'dataforms-layouts__wrapper--grow' );
+
+			const fieldRow =
+				// eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+				container.querySelector( '.dataforms-layouts-regular__field' );
+			expect( fieldRow ).toHaveClass(
+				'dataforms-layouts-regular__field--grow'
+			);
+		} );
 	} );
 
 	describe( 'in panel mode', () => {

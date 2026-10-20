@@ -4,6 +4,26 @@
 	justify-content: flex-start !important;
 	align-items: flex-start !important;
 
+	&--grow {
+		flex: 1;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+
+		> .dataforms-layouts-regular__field-control {
+			flex: 1;
+			min-height: 0;
+			display: flex;
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		> :not(.dataforms-layouts-regular__field-label):not(.components-base-control__label) {
+			flex: 1;
+			min-height: 0;
+		}
+	}
+
 	.components-base-control__label,
 	.components-input-control__label,
 	.components-form-token-field__label {
@@ -22,6 +42,10 @@
 
 	&--label-position-side {
 		align-self: center;
+
+		.dataforms-layouts-regular__field--grow & {
+			align-self: flex-start;
+		}
 	}
 
 	.components-base-control__label {
