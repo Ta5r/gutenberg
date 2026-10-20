@@ -7,7 +7,12 @@ import { __unstableStripHTML as stripHTML } from '@wordpress/dom';
 import { RichTextData } from '@wordpress/rich-text';
 import deprecated from '@wordpress/deprecated';
 import { BLOCK_ICON_DEFAULT } from './constants';
-import { getBlockType, getDefaultBlockName } from './registration';
+import {
+	getBlockType,
+	getDefaultBlockName,
+	getGroupingBlockName,
+	hasBlockSupport,
+} from './registration';
 import type {
 	Block,
 	BlockType,
@@ -475,6 +480,45 @@ export function isContentBlock( name: string ): boolean {
 			attribute?.__experimentalRole === 'content'
 		);
 	} );
+}
+
+/**
+ * Checks if a block is a container block.
+ * A block is considered a container block if it is the registered grouping block,
+ * has explicit container block support, is a core container block (like columns or cover),
+ * or defines layout support and is not a content block or specialized leaf container.
+ *
+ * @param name The name of the block to check.
+ * @return Whether the block is a container block.
+ */
+export function isContainerBlock( name: string ): boolean {
+	if ( ! name ) {
+		return false;
+	}
+
+	const groupingBlockName = getGroupingBlockName();
+	if (
+		( groupingBlockName && name === groupingBlockName ) ||
+		name === 'core/group' ||
+		name === 'core/columns' ||
+		name === 'core/cover'
+	) {
+		return true;
+	}
+
+	if ( hasBlockSupport( name, 'container', false ) ) {
+		return true;
+	}
+
+	if ( hasBlockSupport( name, 'layout' ) && ! isContentBlock( name ) ) {
+		const blockType = getBlockType( name );
+		const allowedBlocks = blockType?.allowedBlocks;
+		if ( ! allowedBlocks || allowedBlocks.length === 0 ) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**

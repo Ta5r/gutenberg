@@ -1,5 +1,5 @@
 import type { Block } from '@wordpress/blocks';
-import { parse } from '@wordpress/blocks';
+import { parse, privateApis as blocksPrivateApis } from '@wordpress/blocks';
 import { parse as grammarParse } from '@wordpress/block-serialization-default-parser';
 import type { select as globalSelect } from '@wordpress/data';
 import {
@@ -23,6 +23,8 @@ import type {
 	UserPattern,
 	UserPatternCategory,
 } from './types';
+
+const { isContainerBlock } = unlock( blocksPrivateApis );
 
 type ParsedPattern = BlockPattern & { blocks: Block[] };
 type GrammarBlock = ReturnType< typeof grammarParse >[ number ];
@@ -67,18 +69,20 @@ function parsePattern( pattern: BlockPattern ): ParsedPattern {
 	const blocks = parse( pattern.content, {
 		__unstableSkipMigrationLogs: true,
 	} );
-	if ( blocks.length === 1 ) {
-		blocks[ 0 ].attributes = {
-			...blocks[ 0 ].attributes,
-			metadata: {
-				...( blocks[ 0 ].attributes.metadata || {} ),
-				categories: pattern.categories,
-				patternName: pattern.name,
-				name:
-					( blocks[ 0 ].attributes as BlockAttributes ).metadata
-						?.name || pattern.title,
-			},
-		};
+	for ( const block of blocks ) {
+		if ( isContainerBlock( block.name ) ) {
+			block.attributes = {
+				...block.attributes,
+				metadata: {
+					...( block.attributes.metadata || {} ),
+					categories: pattern.categories,
+					patternName: pattern.name,
+					name:
+						( block.attributes as BlockAttributes ).metadata
+							?.name || pattern.title,
+				},
+			};
+		}
 	}
 	return {
 		...pattern,

@@ -61,11 +61,27 @@ describe( 'selectors', () => {
 				},
 			} )
 		);
+
+		registerBlockType(
+			'core/group',
+			partial< BlockConfiguration >( {
+				apiVersion: 3,
+				save: () => null,
+				category: 'design',
+				title: 'Group',
+				icon: 'test',
+				keywords: [ 'group' ],
+				supports: {
+					layout: true,
+				},
+			} )
+		);
 	} );
 
 	afterEach( async () => {
 		unregisterBlockType( 'core/test-block-a' );
 		unregisterBlockType( 'core/test-block-b' );
+		unregisterBlockType( 'core/group' );
 	} );
 
 	describe( '__experimentalGetAllowedPatterns', () => {
@@ -170,6 +186,16 @@ describe( 'selectors', () => {
 						content:
 							'<!-- wp:test-block-a --><!-- /wp:test-block-a --><!-- wp:test-block-b --><!-- /wp:test-block-b -->',
 					},
+					{
+						name: 'pattern-container',
+						title: 'pattern with container',
+						content: '<!-- wp:group /-->',
+					},
+					{
+						name: 'pattern-multi-container',
+						title: 'pattern with multiple containers',
+						content: '<!-- wp:group /--><!-- wp:group /-->',
+					},
 				],
 			} );
 		} );
@@ -208,6 +234,44 @@ describe( 'selectors', () => {
 					name: 'core/test-block-a',
 				} )
 			);
+		} );
+		it( 'should attach pattern metadata to a single top-level container block', () => {
+			const { blocks } =
+				select( store ).__experimentalGetParsedPattern(
+					'pattern-container'
+				)!;
+			expect( blocks ).toHaveLength( 1 );
+			expect( blocks[ 0 ].name ).toBe( 'core/group' );
+			expect(
+				( blocks[ 0 ].attributes as Record< string, any > ).metadata
+					?.patternName
+			).toBe( 'pattern-container' );
+		} );
+		it( 'should attach pattern metadata to each top-level container in a multi-container pattern', () => {
+			const { blocks } = select( store ).__experimentalGetParsedPattern(
+				'pattern-multi-container'
+			)!;
+			expect( blocks ).toHaveLength( 2 );
+			expect( blocks[ 0 ].name ).toBe( 'core/group' );
+			expect(
+				( blocks[ 0 ].attributes as Record< string, any > ).metadata
+					?.patternName
+			).toBe( 'pattern-multi-container' );
+			expect( blocks[ 1 ].name ).toBe( 'core/group' );
+			expect(
+				( blocks[ 1 ].attributes as Record< string, any > ).metadata
+					?.patternName
+			).toBe( 'pattern-multi-container' );
+		} );
+		it( 'should not attach pattern metadata to top-level content blocks', () => {
+			const { blocks } =
+				select( store ).__experimentalGetParsedPattern( 'pattern-a' )!;
+			expect( blocks ).toHaveLength( 1 );
+			expect( blocks[ 0 ].name ).toBe( 'core/test-block-a' );
+			expect(
+				( blocks[ 0 ].attributes as Record< string, any > ).metadata
+					?.patternName
+			).toBeUndefined();
 		} );
 	} );
 

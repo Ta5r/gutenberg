@@ -4,6 +4,7 @@ import {
 	createBlock,
 	serialize,
 	getBlockType,
+	privateApis as blocksPrivateApis,
 } from '@wordpress/blocks';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { useState, useCallback } from '@wordpress/element';
@@ -17,6 +18,8 @@ import { store as patternsStore } from '../store';
 import CreatePatternModal from './create-pattern-modal';
 import { unlock } from '../lock-unlock';
 import { PATTERN_SYNC_TYPES } from '../constants';
+
+const { isContainerBlock } = unlock( blocksPrivateApis );
 
 /**
  * Menu control to convert block(s) to a pattern block.
@@ -77,8 +80,12 @@ export default function PatternConvertButton( {
 				);
 
 			const isUnsyncedPattern =
-				blocks.length === 1 &&
-				blocks?.[ 0 ]?.attributes?.metadata?.patternName;
+				blocks.length > 0 &&
+				blocks.some(
+					( block ) =>
+						isContainerBlock( block?.name ) &&
+						block?.attributes?.metadata?.patternName
+				);
 
 			const _canConvert =
 				// Hide when this is already a pattern.
@@ -118,17 +125,22 @@ export default function PatternConvertButton( {
 
 	const handleSuccess = ( { pattern } ) => {
 		if ( pattern.wp_pattern_sync_status === PATTERN_SYNC_TYPES.unsynced ) {
-			if ( clientIds?.length === 1 ) {
-				const existingAttributes = getBlockAttributes( clientIds[ 0 ] );
-				updateBlockAttributes( clientIds[ 0 ], {
-					metadata: {
-						...( existingAttributes?.metadata
-							? existingAttributes.metadata
-							: {} ),
-						patternName: `core/block/${ pattern.id }`,
-						name: pattern.title.raw,
-					},
-				} );
+			const blocks = getBlocksByClientId( clientIds ) ?? [];
+			for ( const block of blocks ) {
+				if ( isContainerBlock( block?.name ) ) {
+					const existingAttributes = getBlockAttributes(
+						block.clientId
+					);
+					updateBlockAttributes( block.clientId, {
+						metadata: {
+							...( existingAttributes?.metadata
+								? existingAttributes.metadata
+								: {} ),
+							patternName: `core/block/${ pattern.id }`,
+							name: pattern.title.raw,
+						},
+					} );
+				}
 			}
 		} else {
 			const newBlock = createBlock( 'core/block', {

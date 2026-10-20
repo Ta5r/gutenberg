@@ -17,6 +17,7 @@ import {
 	__experimentalSanitizeBlockAttributes,
 	getBlockAttributesNamesByRole,
 	isContentBlock,
+	isContainerBlock,
 } from '../utils';
 
 const noop = () => {};
@@ -459,6 +460,81 @@ describe( 'isContentBlock', () => {
 			title: 'test non-content block',
 		} );
 		expect( isContentBlock( 'core/test-non-content-block' ) ).toBe( false );
+	} );
+} );
+
+describe( 'isContainerBlock', () => {
+	it( 'returns true for core container blocks by name', () => {
+		expect( isContainerBlock( 'core/group' ) ).toBe( true );
+		expect( isContainerBlock( 'core/columns' ) ).toBe( true );
+		expect( isContainerBlock( 'core/cover' ) ).toBe( true );
+	} );
+
+	it( 'returns false for empty or non-container blocks by default', () => {
+		expect( isContainerBlock( '' ) ).toBe( false );
+		expect( isContainerBlock( 'core/paragraph' ) ).toBe( false );
+		expect( isContainerBlock( 'core/heading' ) ).toBe( false );
+	} );
+
+	it( 'returns true for blocks with container block support', () => {
+		registerBlockType( 'test/custom-container', {
+			apiVersion: 3,
+			supports: {
+				container: true,
+			},
+			save: noop,
+			category: 'design',
+			title: 'Custom Container',
+		} );
+		expect( isContainerBlock( 'test/custom-container' ) ).toBe( true );
+	} );
+
+	it( 'returns true for blocks with layout support that are not content blocks and have unrestricted inner blocks', () => {
+		registerBlockType( 'test/layout-container', {
+			apiVersion: 3,
+			supports: {
+				layout: true,
+			},
+			save: noop,
+			category: 'design',
+			title: 'Layout Container',
+		} );
+		expect( isContainerBlock( 'test/layout-container' ) ).toBe( true );
+	} );
+
+	it( 'returns false for blocks with layout support that are content blocks', () => {
+		registerBlockType( 'test/layout-content-block', {
+			apiVersion: 3,
+			supports: {
+				layout: true,
+			},
+			attributes: {
+				quote: {
+					type: 'string',
+					role: 'content',
+				},
+			},
+			save: noop,
+			category: 'text',
+			title: 'Layout Content Block',
+		} );
+		expect( isContainerBlock( 'test/layout-content-block' ) ).toBe( false );
+	} );
+
+	it( 'returns false for blocks with layout support that restrict allowedBlocks', () => {
+		registerBlockType( 'test/layout-restricted-container', {
+			apiVersion: 3,
+			supports: {
+				layout: true,
+			},
+			allowedBlocks: [ 'test/item' ],
+			save: noop,
+			category: 'design',
+			title: 'Layout Restricted Container',
+		} );
+		expect( isContainerBlock( 'test/layout-restricted-container' ) ).toBe(
+			false
+		);
 	} );
 } );
 

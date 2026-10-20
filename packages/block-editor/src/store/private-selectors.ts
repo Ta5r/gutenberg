@@ -47,7 +47,8 @@ import type {
 	UserPattern,
 } from './types';
 
-const { isContentBlock, editableRootKey } = unlock( blocksPrivateApis );
+const { isContentBlock, isContainerBlock, editableRootKey } =
+	unlock( blocksPrivateApis );
 const { getViewportBreakpoints } = unlock( globalStylesEnginePrivateApis );
 
 export { getBlockSettings } from './get-block-settings';
@@ -794,7 +795,8 @@ function isSectionBlockCandidate( state: State, clientId: string ) {
 
 	if (
 		( ( ! disableContentOnlyForUnsyncedPatterns &&
-			attributes?.metadata?.patternName ) ||
+			attributes?.metadata?.patternName &&
+			isContainerBlock( blockName ) ) ||
 			( isTemplatePart && ! disableContentOnlyForTemplateParts ) ) &&
 		! isIsolatedEditor
 	) {

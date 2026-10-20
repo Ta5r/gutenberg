@@ -880,6 +880,9 @@ describe( 'private selectors', () => {
 					title: 'Test structure block',
 					category: 'design',
 					save: () => null,
+					supports: {
+						container: true,
+					},
 				} )
 			);
 		} );
@@ -2359,6 +2362,34 @@ describe( 'private selectors', () => {
 				patternName: 'my-pattern',
 			} );
 			expect( isSectionBlock( state, 'block-1' ) ).toBe( true );
+		} );
+
+		it( 'should return true for container blocks like columns and cover with patternName', () => {
+			const columnsState = createState( {
+				blockName: 'core/columns',
+				patternName: 'my-pattern',
+			} );
+			expect( isSectionBlock( columnsState, 'block-1' ) ).toBe( true );
+
+			const coverState = createState( {
+				blockName: 'core/cover',
+				patternName: 'my-pattern',
+			} );
+			expect( isSectionBlock( coverState, 'block-1' ) ).toBe( true );
+		} );
+
+		it( 'should return false for content blocks with patternName (e.g. paragraph, heading)', () => {
+			const paragraphState = createState( {
+				blockName: 'core/paragraph',
+				patternName: 'my-pattern',
+			} );
+			expect( isSectionBlock( paragraphState, 'block-1' ) ).toBe( false );
+
+			const headingState = createState( {
+				blockName: 'core/heading',
+				patternName: 'my-pattern',
+			} );
+			expect( isSectionBlock( headingState, 'block-1' ) ).toBe( false );
 		} );
 
 		it( 'should return false for blocks with patternName when disableContentOnlyForUnsyncedPatterns is true', () => {

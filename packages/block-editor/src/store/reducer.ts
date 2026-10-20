@@ -30,7 +30,7 @@ import type {
 	TreeBlock,
 } from './types';
 
-const { isContentBlock } = unlock( blocksPrivateApis );
+const { isContentBlock, isContainerBlock } = unlock( blocksPrivateApis );
 
 const identity = < T >( x: T ) => x;
 
@@ -2744,9 +2744,15 @@ function getDerivedBlockEditingModesForTree( state: State, treeClientId = '' ) {
 		isIsolatedEditor || disableContentOnlyForUnsyncedPatterns
 			? []
 			: Array.from( state.blocks.attributes.keys() ).filter(
-					( clientId ) =>
-						state.blocks.attributes.get( clientId )?.metadata
-							?.patternName
+					( clientId ) => {
+						const blockName =
+							state.blocks.byClientId.get( clientId )?.name;
+						return (
+							state.blocks.attributes.get( clientId )?.metadata
+								?.patternName &&
+							( ! blockName || isContainerBlock( blockName ) )
+						);
+					}
 				);
 	const disableContentOnlyForTemplateParts =
 		state.settings?.disableContentOnlyForTemplateParts;
@@ -3082,12 +3088,15 @@ export function withDerivedBlockEditingModes( reducer: Reducer< State > ) {
 						break;
 					}
 
+					const blockName =
+						state.blocks.byClientId.get( clientId )?.name;
 					if (
 						// patternName is switching from falsy to truthy, indicating
 						// this block is becoming an unsynced pattern.
 						attributes.metadata?.patternName &&
 						! state.blocks.attributes.get( clientId )?.metadata
-							?.patternName
+							?.patternName &&
+						( ! blockName || isContainerBlock( blockName ) )
 					) {
 						addedBlocks.push(
 							nextState.blocks.tree.get( clientId ) as
