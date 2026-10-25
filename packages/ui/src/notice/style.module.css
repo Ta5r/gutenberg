@@ -75,32 +75,53 @@
 			margin-inline-start: var(--wpds-dimension-gap-xs);
 		}
 
-		.is-info {
+		.is-info,
+		.is-informational {
 			--wp-ui-notice-background-color: var(--wpds-color-background-surface-info-weak);
 			--wp-ui-notice-border-color: var(--wpds-color-stroke-surface-info);
 			--wp-ui-notice-text-color: var(--wpds-color-foreground-content-info);
 			--wp-ui-notice-decorative-icon-color: var(--wpds-color-foreground-content-info-weak);
 		}
 
-		.is-warning {
+		.is-caution,
+		.is-low {
+			--wp-ui-notice-background-color: var(--wpds-color-background-surface-caution-weak);
+			--wp-ui-notice-border-color: var(--wpds-color-stroke-surface-caution);
+			--wp-ui-notice-text-color: var(--wpds-color-foreground-content-caution);
+			--wp-ui-notice-decorative-icon-color: var(--wpds-color-foreground-content-caution-weak);
+		}
+
+		.is-warning,
+		.is-medium {
 			--wp-ui-notice-background-color: var(--wpds-color-background-surface-warning-weak);
 			--wp-ui-notice-border-color: var(--wpds-color-stroke-surface-warning);
 			--wp-ui-notice-text-color: var(--wpds-color-foreground-content-warning);
 			--wp-ui-notice-decorative-icon-color: var(--wpds-color-foreground-content-warning-weak);
 		}
 
-		.is-success {
+		.is-success,
+		.is-stable {
 			--wp-ui-notice-background-color: var(--wpds-color-background-surface-success-weak);
 			--wp-ui-notice-border-color: var(--wpds-color-stroke-surface-success);
 			--wp-ui-notice-text-color: var(--wpds-color-foreground-content-success);
 			--wp-ui-notice-decorative-icon-color: var(--wpds-color-foreground-content-success-weak);
 		}
 
-		.is-error {
+		.is-error,
+		.is-high {
 			--wp-ui-notice-background-color: var(--wpds-color-background-surface-error-weak);
 			--wp-ui-notice-border-color: var(--wpds-color-stroke-surface-error);
 			--wp-ui-notice-text-color: var(--wpds-color-foreground-content-error);
 			--wp-ui-notice-decorative-icon-color: var(--wpds-color-foreground-content-error-weak);
+		}
+
+		.is-neutral,
+		.is-none,
+		.is-draft {
+			--wp-ui-notice-background-color: var(--wpds-color-background-surface-neutral-weak);
+			--wp-ui-notice-border-color: var(--wpds-color-stroke-surface-neutral);
+			--wp-ui-notice-text-color: var(--wpds-color-foreground-content-neutral);
+			--wp-ui-notice-decorative-icon-color: var(--wpds-color-foreground-content-neutral);
 		}
 
 		/* Matches --wpds-dimension-surface-width-sm (container queries don't support custom properties). */

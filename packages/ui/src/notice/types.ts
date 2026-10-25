@@ -5,12 +5,25 @@ import type { ButtonProps } from '../button/types';
 import type { IconButtonProps } from '../icon-button/types';
 import type { LinkProps } from '../link/types';
 
-export type NoticeIntent = 'warning' | 'success' | 'error' | 'info' | 'neutral';
+export type NoticeIntent =
+	| 'neutral'
+	| 'info'
+	| 'caution'
+	| 'warning'
+	| 'success'
+	| 'error'
+	| 'none'
+	| 'informational'
+	| 'low'
+	| 'medium'
+	| 'stable'
+	| 'high'
+	| 'draft';
 
 export interface RootProps extends Omit< ComponentProps< 'div' >, 'title' > {
 	/**
 	 * The semantic intent of the notice, communicating its meaning through color.
-	 * Available intents: neutral, info, warning, success, and error.
+	 * Available intents: neutral, info, caution, warning, success, error.
 	 *
 	 * @default 'neutral'
 	 */
@@ -18,8 +31,8 @@ export interface RootProps extends Omit< ComponentProps< 'div' >, 'title' > {
 
 	/**
 	 * Custom icon to override the default intent icon. Pass `null` to hide the icon.
-	 * Default icons by intent: neutral (none), info (info), warning (caution),
-	 * success (published), error (error).
+	 * Default icons by intent: neutral (none), info (info), caution (caution),
+	 * warning (caution), success (published), error (error).
 	 */
 	icon?: IconProps[ 'icon' ] | null;
 

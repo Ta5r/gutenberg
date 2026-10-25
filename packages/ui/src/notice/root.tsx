@@ -10,10 +10,18 @@ import styles from './style.module.css';
 
 const icons: { [ key in NoticeIntent ]: IconProps[ 'icon' ] | null } = {
 	neutral: null,
+	none: null,
+	draft: null,
 	info,
+	informational: info,
+	caution,
+	low: caution,
 	warning: caution,
+	medium: caution,
 	success: published,
+	stable: published,
 	error,
+	high: error,
 };
 
 /**

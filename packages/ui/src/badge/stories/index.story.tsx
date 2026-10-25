@@ -24,6 +24,54 @@ export const Default: Story = {
 	},
 };
 
+export const Error: Story = {
+	...Default,
+	args: {
+		...Default.args,
+		intent: 'error',
+	},
+};
+
+export const Warning: Story = {
+	...Default,
+	args: {
+		...Default.args,
+		intent: 'warning',
+	},
+};
+
+export const Caution: Story = {
+	...Default,
+	args: {
+		...Default.args,
+		intent: 'caution',
+	},
+};
+
+export const Success: Story = {
+	...Default,
+	args: {
+		...Default.args,
+		intent: 'success',
+	},
+};
+
+export const Info: Story = {
+	...Default,
+	args: {
+		...Default.args,
+		intent: 'info',
+	},
+};
+
+export const Neutral: Story = {
+	...Default,
+	args: {
+		...Default.args,
+		intent: 'neutral',
+	},
+};
+
 export const High: Story = {
 	...Default,
 	args: {
@@ -93,13 +141,19 @@ export const AllIntents: Story = {
 		>
 			{ (
 				[
-					'high',
-					'medium',
-					'low',
-					'stable',
-					'informational',
+					'neutral',
+					'info',
+					'caution',
+					'warning',
+					'success',
+					'error',
 					'draft',
 					'none',
+					'informational',
+					'low',
+					'medium',
+					'stable',
+					'high',
 				] as const
 			 ).map( ( intent ) => (
 				<Fragment key={ intent }>

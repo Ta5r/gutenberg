@@ -59,6 +59,14 @@ export const Info: Story = {
 	},
 };
 
+export const Caution: Story = {
+	...Default,
+	args: {
+		...Default.args,
+		intent: 'caution',
+	},
+};
+
 export const Warning: Story = {
 	...Default,
 	args: {

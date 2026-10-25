@@ -131,6 +131,20 @@ describe( 'Notice', () => {
 			expect( icon ).toHaveAttribute( 'aria-hidden', 'true' );
 		} );
 
+		it( 'renders icon for caution intent', () => {
+			const { container } = render(
+				<Notice.Root intent="caution">
+					<Notice.Description>Caution message</Notice.Description>
+				</Notice.Root>
+			);
+			// Disable reason: The decorative SVG has aria-hidden and no role,
+			// so there is no Testing Library query that can target it.
+			// eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+			const icon = container.querySelector( 'svg' );
+			expect( icon ).toBeVisible();
+			expect( icon ).toHaveAttribute( 'aria-hidden', 'true' );
+		} );
+
 		it( 'does not render icon for neutral intent', () => {
 			const { container } = render(
 				<Notice.Root intent="neutral">
@@ -141,6 +155,32 @@ describe( 'Notice', () => {
 			// so there is no Testing Library query that can target it.
 			// eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
 			expect( container.querySelector( 'svg' ) ).not.toBeInTheDocument();
+		} );
+
+		it( 'does not render icon for none and draft intents', () => {
+			const { container: noneContainer } = render(
+				<Notice.Root intent="none">
+					<Notice.Description>None message</Notice.Description>
+				</Notice.Root>
+			);
+			// Disable reason: The decorative SVG has aria-hidden and no role,
+			// so there is no Testing Library query that can target it.
+			expect(
+				// eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+				noneContainer.querySelector( 'svg' )
+			).not.toBeInTheDocument();
+
+			const { container: draftContainer } = render(
+				<Notice.Root intent="draft">
+					<Notice.Description>Draft message</Notice.Description>
+				</Notice.Root>
+			);
+			// Disable reason: The decorative SVG has aria-hidden and no role,
+			// so there is no Testing Library query that can target it.
+			expect(
+				// eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+				draftContainer.querySelector( 'svg' )
+			).not.toBeInTheDocument();
 		} );
 
 		it( 'hides icon when icon prop is null', () => {

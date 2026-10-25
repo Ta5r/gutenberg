@@ -8,26 +8,31 @@
 			border-radius: var(--wpds-border-radius-lg);
 		}
 
+		.is-error-intent,
 		.is-high-intent {
 			background-color: var(--wpds-color-background-surface-error);
 			color: var(--wpds-color-foreground-content-error);
 		}
 
+		.is-warning-intent,
 		.is-medium-intent {
 			background-color: var(--wpds-color-background-surface-warning);
 			color: var(--wpds-color-foreground-content-warning);
 		}
 
+		.is-caution-intent,
 		.is-low-intent {
 			background-color: var(--wpds-color-background-surface-caution);
 			color: var(--wpds-color-foreground-content-caution);
 		}
 
+		.is-success-intent,
 		.is-stable-intent {
 			background-color: var(--wpds-color-background-surface-success);
 			color: var(--wpds-color-foreground-content-success);
 		}
 
+		.is-info-intent,
 		.is-informational-intent {
 			background-color: var(--wpds-color-background-surface-info);
 			color: var(--wpds-color-foreground-content-info);
@@ -38,6 +43,7 @@
 			color: var(--wpds-color-foreground-content-neutral);
 		}
 
+		.is-neutral-intent,
 		.is-none-intent {
 			background-color: var(--wpds-color-background-surface-neutral-strong);
 			color: var(--wpds-color-foreground-content-neutral);
