@@ -1020,149 +1020,27 @@ function gutenberg_unique_id_from_values( array $data, string $prefix = '' ): st
 }
 
 /**
- * Renders the layout config to the block wrapper.
+ * Generates the CSS classes and enqueues the layout styles for a block's layout container.
  *
- * @param string $block_content Rendered block content.
- * @param array  $block         Block object.
- * @return string Filtered block content.
+ * @since 6.8.0
+ *
+ * @param array              $block      The block object.
+ * @param WP_Block_Type|null $block_type Optional. The block type object.
+ * @return array Array containing generated class names.
  */
-function gutenberg_render_layout_support_flag( $block_content, $block ) {
-	$block_type            = WP_Block_Type_Registry::get_instance()->get_registered( $block['blockName'] );
-	$block_supports_layout = block_has_support( $block_type, array( 'layout' ), false ) || block_has_support( $block_type, array( '__experimentalLayout' ), false );
-	$style_attr            = $block['attrs']['style'] ?? array();
-	/*
-	 * A block with no layout support and no style attribute at all cannot
-	 * produce layout output, so return before resolving global settings.
-	 *
-	 * Resolving settings is not read-only: on a cold cache it queries the
-	 * user's `wp_global_styles` post, which fires `the_posts`. A callback on
-	 * that hook that renders blocks re-enters this filter, and the content it
-	 * renders at that point is the global styles post itself, which parses to a
-	 * single block with no name and no attributes. Without this return that
-	 * block resolves settings again and the recursion has no base case.
-	 */
-	if ( ! $block_supports_layout && empty( $style_attr ) ) {
-		return $block_content;
+function gutenberg_get_layout_container_classes_and_styles( $block, $block_type = null ) {
+	if ( ! $block_type ) {
+		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( $block['blockName'] ?? '' );
+	}
+
+	if ( ! $block_type ) {
+		return array();
 	}
 
 	$global_settings          = gutenberg_get_global_settings();
 	$viewport_settings        = $global_settings['viewport'] ?? null;
 	$responsive_media_queries = WP_Theme_JSON_Gutenberg::get_viewport_media_queries( $viewport_settings );
-	// If there is any value in style -> layout, the block has a child layout.
-	$child_layout = $style_attr['layout'] ?? null;
-
-	// Collect responsive viewport child layout overrides so that a block with
-	// only responsive child layout (no base child layout) is still processed.
-	$viewport_child_layouts = array();
-	foreach ( $responsive_media_queries as $breakpoint => $media_query ) {
-		$viewport_child = gutenberg_get_layout_child_values( $style_attr[ $breakpoint ]['layout'] ?? null );
-		if ( ! empty( $viewport_child ) ) {
-			$viewport_child_layouts[ $breakpoint ] = array(
-				'media_query'  => $media_query,
-				'child_layout' => $viewport_child,
-			);
-		}
-	}
-
-	if ( ! $block_supports_layout && ! $child_layout && empty( $viewport_child_layouts ) ) {
-		return $block_content;
-	}
-
-	$outer_class_names = array();
-
-	// Child layout specific logic.
-	if ( $child_layout || ! empty( $viewport_child_layouts ) ) {
-		$base_child_layout = gutenberg_get_layout_child_values( $child_layout );
-		$parent_layout     = $block['parentLayout'] ?? array();
-
-		/*
-		 * Generates a unique class for child block layout styles.
-		 *
-		 * To ensure consistent class generation across different page renders,
-		 * only properties that affect layout styling are used. These properties
-		 * come from `$block['attrs']['style']['layout']`, viewport overrides in
-		 * `$block['attrs']['style'][$breakpoint]['layout']`, and
-		 * `$block['parentLayout']`.
-		 *
-		 * As long as these properties coincide, the generated class will be the same.
-		 */
-		$container_content_hash_input = array(
-			'layout'       => $base_child_layout,
-			'parentLayout' => array_intersect_key(
-				$parent_layout,
-				array_flip( array( 'minimumColumnWidth', 'columnCount' ) )
-			),
-		);
-		foreach ( $viewport_child_layouts as $breakpoint => $viewport_data ) {
-			$container_content_hash_input[ $breakpoint ] = $viewport_data['child_layout'];
-		}
-		$container_content_class = gutenberg_unique_id_from_values(
-			$container_content_hash_input,
-			'wp-container-content-'
-		);
-
-		$child_layout_styles = gutenberg_get_child_layout_style_rules(
-			".$container_content_class",
-			$base_child_layout,
-			$parent_layout
-		);
-
-		// Emit responsive child layout CSS using the same container-content class
-		// so that base and responsive child layout share the exact same selector.
-		foreach ( $viewport_child_layouts as $viewport_data ) {
-			$viewport_child_styles = gutenberg_get_child_layout_style_rules(
-				".$container_content_class",
-				$base_child_layout,
-				$parent_layout,
-				$viewport_data['child_layout']
-			);
-			foreach ( $viewport_child_styles as $index => $rule ) {
-				$viewport_child_styles[ $index ]['rules_group'] = $viewport_data['media_query'];
-			}
-
-			$child_layout_styles = array_merge( $child_layout_styles, $viewport_child_styles );
-		}
-
-		/*
-		 * Add to the style engine store to enqueue and render layout styles.
-		 * Return styles here just to check if any exist.
-		 */
-		$child_css = gutenberg_style_engine_get_stylesheet_from_css_rules(
-			$child_layout_styles,
-			array(
-				'context'  => 'block-supports',
-				'prettify' => false,
-			)
-		);
-
-		if ( $child_css ) {
-			$outer_class_names[] = $container_content_class;
-		}
-	}
-
-	// Prep the processor for modifying the block output.
-	$processor = new WP_HTML_Tag_Processor( $block_content );
-
-	// Having no tags implies there are no tags onto which to add class names.
-	if ( ! $processor->next_tag() ) {
-		return $block_content;
-	}
-
-	/*
-	 * A block may not support layout but still be affected by a parent block's layout.
-	 *
-	 * In these cases add the appropriate class names and then return early; there's
-	 * no need to investigate on this block whether additional layout constraints apply.
-	 */
-	if ( ! $block_supports_layout && ! empty( $outer_class_names ) ) {
-		foreach ( $outer_class_names as $class_name ) {
-			$processor->add_class( $class_name );
-		}
-		return $processor->get_updated_html();
-	} elseif ( ! $block_supports_layout ) {
-		// Ensure layout classnames are not injected if there is no layout support.
-		return $block_content;
-	}
+	$style_attr               = $block['attrs']['style'] ?? array();
 
 	$fallback_layout = $block_type->supports['layout']['default'] ?? array();
 	if ( empty( $fallback_layout ) ) {
@@ -1174,7 +1052,7 @@ function gutenberg_render_layout_support_flag( $block_content, $block ) {
 	$layout_definitions = gutenberg_get_layout_definitions();
 
 	// Set the correct layout type for blocks using legacy content width.
-	if ( isset( $used_layout['inherit'] ) && $used_layout['inherit'] || isset( $used_layout['contentSize'] ) && $used_layout['contentSize'] ) {
+	if ( ( isset( $used_layout['inherit'] ) && $used_layout['inherit'] ) || ( isset( $used_layout['contentSize'] ) && $used_layout['contentSize'] ) ) {
 		$used_layout['type'] = 'constrained';
 	}
 
@@ -1221,7 +1099,6 @@ function gutenberg_render_layout_support_flag( $block_content, $block ) {
 	 * Attribute-based Layout classnames are output in all cases.
 	 */
 	if ( ! current_theme_supports( 'disable-layout-styles' ) ) {
-
 		$gap_value = gutenberg_sanitize_block_gap_value( $block['attrs']['style']['spacing']['blockGap'] ?? null );
 
 		$fallback_gap_value = gutenberg_sanitize_block_gap_value(
@@ -1384,6 +1261,168 @@ function gutenberg_render_layout_support_flag( $block_content, $block ) {
 	$split_block_name = explode( '/', $block['blockName'] );
 	$full_block_name  = 'core' === $split_block_name[0] ? end( $split_block_name ) : implode( '-', $split_block_name );
 	$class_names[]    = 'wp-block-' . $full_block_name . '-' . $layout_classname;
+
+	return $class_names;
+}
+
+/**
+ * Renders the layout config to the block wrapper.
+ *
+ * @param string $block_content Rendered block content.
+ * @param array  $block         Block object.
+ * @return string Filtered block content.
+ */
+function gutenberg_render_layout_support_flag( $block_content, $block ) {
+	$block_type            = WP_Block_Type_Registry::get_instance()->get_registered( $block['blockName'] );
+	$block_supports_layout = block_has_support( $block_type, array( 'layout' ), false ) || block_has_support( $block_type, array( '__experimentalLayout' ), false );
+	$style_attr            = $block['attrs']['style'] ?? array();
+	/*
+	 * A block with no layout support and no style attribute at all cannot
+	 * produce layout output, so return before resolving global settings.
+	 *
+	 * Resolving settings is not read-only: on a cold cache it queries the
+	 * user's `wp_global_styles` post, which fires `the_posts`. A callback on
+	 * that hook that renders blocks re-enters this filter, and the content it
+	 * renders at that point is the global styles post itself, which parses to a
+	 * single block with no name and no attributes. Without this return that
+	 * block resolves settings again and the recursion has no base case.
+	 */
+	if ( ! $block_supports_layout && empty( $style_attr ) ) {
+		return $block_content;
+	}
+
+	$global_settings          = gutenberg_get_global_settings();
+	$viewport_settings        = $global_settings['viewport'] ?? null;
+	$responsive_media_queries = WP_Theme_JSON_Gutenberg::get_viewport_media_queries( $viewport_settings );
+	// If there is any value in style -> layout, the block has a child layout.
+	$child_layout = $style_attr['layout'] ?? null;
+
+	// Collect responsive viewport child layout overrides so that a block with
+	// only responsive child layout (no base child layout) is still processed.
+	$viewport_child_layouts = array();
+	foreach ( $responsive_media_queries as $breakpoint => $media_query ) {
+		$viewport_child = gutenberg_get_layout_child_values( $style_attr[ $breakpoint ]['layout'] ?? null );
+		if ( ! empty( $viewport_child ) ) {
+			$viewport_child_layouts[ $breakpoint ] = array(
+				'media_query'  => $media_query,
+				'child_layout' => $viewport_child,
+			);
+		}
+	}
+
+	if ( ! $block_supports_layout && ! $child_layout && empty( $viewport_child_layouts ) ) {
+		return $block_content;
+	}
+
+	$outer_class_names = array();
+
+	// Child layout specific logic.
+	if ( $child_layout || ! empty( $viewport_child_layouts ) ) {
+		$base_child_layout = gutenberg_get_layout_child_values( $child_layout );
+		$parent_layout     = $block['parentLayout'] ?? array();
+
+		/*
+		 * Generates a unique class for child block layout styles.
+		 *
+		 * To ensure consistent class generation across different page renders,
+		 * only properties that affect layout styling are used. These properties
+		 * come from `$block['attrs']['style']['layout']`, viewport overrides in
+		 * `$block['attrs']['style'][$breakpoint]['layout']`, and
+		 * `$block['parentLayout']`.
+		 *
+		 * As long as these properties coincide, the generated class will be the same.
+		 */
+		$container_content_hash_input = array(
+			'layout'       => $base_child_layout,
+			'parentLayout' => array_intersect_key(
+				$parent_layout,
+				array_flip( array( 'minimumColumnWidth', 'columnCount' ) )
+			),
+		);
+		foreach ( $viewport_child_layouts as $breakpoint => $viewport_data ) {
+			$container_content_hash_input[ $breakpoint ] = $viewport_data['child_layout'];
+		}
+		$container_content_class = gutenberg_unique_id_from_values(
+			$container_content_hash_input,
+			'wp-container-content-'
+		);
+
+		$child_layout_styles = gutenberg_get_child_layout_style_rules(
+			".$container_content_class",
+			$base_child_layout,
+			$parent_layout
+		);
+
+		// Emit responsive child layout CSS using the same container-content class
+		// so that base and responsive child layout share the exact same selector.
+		foreach ( $viewport_child_layouts as $viewport_data ) {
+			$viewport_child_styles = gutenberg_get_child_layout_style_rules(
+				".$container_content_class",
+				$base_child_layout,
+				$parent_layout,
+				$viewport_data['child_layout']
+			);
+			foreach ( $viewport_child_styles as $index => $rule ) {
+				$viewport_child_styles[ $index ]['rules_group'] = $viewport_data['media_query'];
+			}
+
+			$child_layout_styles = array_merge( $child_layout_styles, $viewport_child_styles );
+		}
+
+		/*
+		 * Add to the style engine store to enqueue and render layout styles.
+		 * Return styles here just to check if any exist.
+		 */
+		$child_css = gutenberg_style_engine_get_stylesheet_from_css_rules(
+			$child_layout_styles,
+			array(
+				'context'  => 'block-supports',
+				'prettify' => false,
+			)
+		);
+
+		if ( $child_css ) {
+			$outer_class_names[] = $container_content_class;
+		}
+	}
+
+	// Prep the processor for modifying the block output.
+	$processor = new WP_HTML_Tag_Processor( $block_content );
+
+	// Having no tags implies there are no tags onto which to add class names.
+	if ( ! $processor->next_tag() ) {
+		return $block_content;
+	}
+
+	/*
+	 * A block may not support layout but still be affected by a parent block's layout.
+	 *
+	 * In these cases add the appropriate class names and then return early; there's
+	 * no need to investigate on this block whether additional layout constraints apply.
+	 */
+	if ( ! $block_supports_layout && ! empty( $outer_class_names ) ) {
+		foreach ( $outer_class_names as $class_name ) {
+			$processor->add_class( $class_name );
+		}
+		return $processor->get_updated_html();
+	} elseif ( ! $block_supports_layout ) {
+		// Ensure layout classnames are not injected if there is no layout support.
+		return $block_content;
+	}
+
+	// If the inner blocks container already received layout attributes via get_inner_blocks_wrapper_attributes(),
+	// do not add container layout classes to the outer wrapper.
+	if ( function_exists( 'gutenberg_is_inner_blocks_layout_handled' ) && gutenberg_is_inner_blocks_layout_handled( $block ) ) {
+		if ( ! empty( $outer_class_names ) ) {
+			foreach ( $outer_class_names as $class_name ) {
+				$processor->add_class( $class_name );
+			}
+			return $processor->get_updated_html();
+		}
+		return $block_content;
+	}
+
+	$class_names = gutenberg_get_layout_container_classes_and_styles( $block, $block_type );
 
 	// Add classes to the outermost HTML tag if necessary.
 	if ( ! empty( $outer_class_names ) ) {
