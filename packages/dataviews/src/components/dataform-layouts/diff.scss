@@ -1,0 +1,149 @@
+// Visual diff indicators and badges for DataForm compare / revisions mode.
+$diff-added-color: #008a20;
+$diff-added-bg: #ecf7ed;
+$diff-added-border: #c3e6cb;
+
+$diff-modified-color: #9a7000;
+$diff-modified-bg: #fef8e7;
+$diff-modified-border: #ffeeba;
+
+$diff-removed-color: #d63638;
+$diff-removed-bg: #fcf0f0;
+$diff-removed-border: #f5c6cb;
+
+.dataforms-layouts-regular__field-label-wrapper {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.dataforms-diff-badge {
+	font-size: 11px;
+	line-height: 1;
+	font-weight: 600;
+
+	&--badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 3px;
+		padding: 2px 6px;
+		border-radius: 4px;
+		letter-spacing: 0.02em;
+
+		&.is-added {
+			color: $diff-added-color;
+			background: $diff-added-bg;
+			border: 1px solid $diff-added-border;
+		}
+
+		&.is-modified {
+			color: $diff-modified-color;
+			background: $diff-modified-bg;
+			border: 1px solid $diff-modified-border;
+		}
+
+		&.is-removed {
+			color: $diff-removed-color;
+			background: $diff-removed-bg;
+			border: 1px solid $diff-removed-border;
+		}
+	}
+
+	&--dot {
+		display: inline-block;
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		vertical-align: middle;
+
+		&.is-added {
+			background-color: $diff-added-color;
+		}
+
+		&.is-modified {
+			background-color: $diff-modified-color;
+		}
+
+		&.is-removed {
+			background-color: $diff-removed-color;
+		}
+	}
+
+	&__symbol {
+		font-weight: 700;
+	}
+}
+
+.dataforms-field-diff-inline {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	flex-wrap: wrap;
+
+	.dataforms-field-diff-arrow {
+		color: #757575;
+		user-select: none;
+	}
+}
+
+.dataforms-field-diff-stacked {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	width: 100%;
+}
+
+.dataforms-field-diff-side-by-side {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12px;
+	width: 100%;
+
+	&__col {
+		padding: 6px 8px;
+		border-radius: 4px;
+		background: #f8f9fa;
+		border: 1px solid #e2e4e7;
+
+		&.is-previous {
+			border-color: $diff-removed-border;
+		}
+
+		&.is-current {
+			border-color: $diff-added-border;
+		}
+	}
+}
+
+.dataforms-field-diff-sublabel {
+	font-size: 10px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: #757575;
+	display: block;
+	margin-bottom: 2px;
+}
+
+del.dataforms-field-diff-previous,
+del.dataforms-field-diff-removed,
+.dataforms-field-diff-previous del {
+	text-decoration: line-through;
+	color: $diff-removed-color;
+	background: rgba($diff-removed-color, 0.08);
+	padding: 1px 4px;
+	border-radius: 2px;
+}
+
+ins.dataforms-field-diff-current,
+ins.dataforms-field-diff-added,
+.dataforms-field-diff-current ins {
+	text-decoration: none;
+	color: $diff-added-color;
+	background: rgba($diff-added-color, 0.08);
+	padding: 1px 4px;
+	border-radius: 2px;
+	font-weight: 500;
+}
+

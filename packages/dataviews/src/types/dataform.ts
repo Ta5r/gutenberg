@@ -1,4 +1,14 @@
 import type { Field, FieldValidity } from './field-api';
+import type { FieldDiff } from '../utils/diff';
+
+/**
+ * The layout used to display differences between revisions/items:
+ *
+ * - `inline`: displays the current value with a diff status indicator alongside it.
+ * - `stacked`: displays the previous value and current value vertically stacked.
+ * - `side-by-side`: displays previous and current values in side-by-side columns.
+ */
+export type ComparisonLayout = 'inline' | 'stacked' | 'side-by-side';
 
 /**
  * The layouts available for rendering a form or a form field:
@@ -527,9 +537,20 @@ export type NormalizedForm = {
  */
 export interface DataFormProps< Item > {
 	/**
-	 * The item being edited.
+	 * The item being edited (or the current revision).
 	 */
 	data: Item;
+
+	/**
+	 * The previous revision or data item to compare against.
+	 * When provided, DataForm enters revisions/compare mode.
+	 */
+	previousData?: Item;
+
+	/**
+	 * How changes are displayed when in comparison mode. Defaults to `inline`.
+	 */
+	comparisonLayout?: ComparisonLayout;
 
 	/**
 	 * The field definitions for the item.
@@ -547,8 +568,9 @@ export interface DataFormProps< Item > {
 	 * keyed by field id, nested for dotted ids (e.g. `{ a: { b: value } }`
 	 * for the field `a.b`); a custom `setValue` may return any other partial
 	 * shape of the item.
+	 * Optional in comparison mode or when all fields are read-only.
 	 */
-	onChange: ( value: Record< string, any > ) => void;
+	onChange?: ( value: Record< string, any > ) => void;
 
 	/**
 	 * The validity state of the form's fields, keyed by field id.
@@ -572,6 +594,21 @@ export interface FieldLayoutProps< Item > {
 	data: Item;
 
 	/**
+	 * The previous data item being compared against, if in comparison mode.
+	 */
+	previousData?: Item;
+
+	/**
+	 * The diff information for this field, if in comparison mode.
+	 */
+	diff?: FieldDiff;
+
+	/**
+	 * The comparison layout mode, if in comparison mode.
+	 */
+	comparisonLayout?: ComparisonLayout;
+
+	/**
 	 * The normalized form field to render.
 	 */
 	field: NormalizedFormField;
@@ -582,7 +619,7 @@ export interface FieldLayoutProps< Item > {
 	 * keyed by field id, nested for dotted ids; a custom `setValue` may
 	 * return any other partial shape of the item.
 	 */
-	onChange: ( value: any ) => void;
+	onChange?: ( value: any ) => void;
 
 	/**
 	 * Whether the field's label is visually hidden

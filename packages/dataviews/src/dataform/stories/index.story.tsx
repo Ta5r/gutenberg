@@ -9,6 +9,7 @@ import DataAdapterComponent from './data-adapter';
 import ValidationComponent from './validation';
 import ValidationPanelComponent from './validation-panel';
 import VisibilityComponent from './visibility';
+import CompareComponent from './compare';
 
 const meta = {
 	tags: [ 'manifest' ],
@@ -209,4 +210,18 @@ export const Visibility = {
 
 export const DataAdapter = {
 	render: DataAdapterComponent,
+};
+
+export const Compare = {
+	render: CompareComponent,
+	argTypes: {
+		comparisonLayout: {
+			control: { type: 'select' },
+			description: 'How differences are displayed between revisions.',
+			options: [ 'inline', 'stacked', 'side-by-side' ],
+		},
+	},
+	args: {
+		comparisonLayout: 'inline',
+	},
 };

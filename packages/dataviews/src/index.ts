@@ -1,7 +1,10 @@
 export { default as DataViews } from './dataviews';
 export { default as DataViewsPicker } from './dataviews-picker';
 export { default as DataForm } from './dataform';
+export { default as DiffBadge } from './components/dataform-layouts/diff-badge';
 export { default as filterSortAndPaginate } from './utils/filter-sort-and-paginate';
+export { computeFieldDiff, isEmptyValue } from './utils/diff';
 export { useFormValidity } from './hooks';
 export { VIEW_LAYOUTS } from './components/dataviews-layouts';
 export type * from './types';
+export type { DiffStatus, FieldDiff } from './utils/diff';

@@ -1,11 +1,14 @@
 import { useContext, useMemo } from '@wordpress/element';
 import { Stack } from '@wordpress/ui';
 import type {
+	ComparisonLayout,
 	FieldValidity,
 	FormValidity,
 	NormalizedForm,
 	NormalizedFormField,
 } from '../../types';
+import type { FieldDiff } from '../../utils/diff';
+import { computeFieldDiff } from '../../utils/diff';
 import { getFormFieldLayout } from './index';
 import DataFormContext from '../dataform-context';
 
@@ -17,6 +20,8 @@ const DEFAULT_WRAPPER = ( { children }: { children: React.ReactNode } ) => (
 
 export function DataFormLayout< Item >( {
 	data,
+	previousData: previousDataProp,
+	comparisonLayout: comparisonLayoutProp,
 	form,
 	onChange,
 	validity,
@@ -24,12 +29,17 @@ export function DataFormLayout< Item >( {
 	as,
 }: {
 	data: Item;
+	previousData?: Item;
+	comparisonLayout?: ComparisonLayout;
 	form: NormalizedForm;
 	onChange: ( value: any ) => void;
 	validity?: FormValidity;
 	children?: (
 		FieldLayout: ( props: {
 			data: Item;
+			previousData?: Item;
+			diff?: FieldDiff;
+			comparisonLayout?: ComparisonLayout;
 			field: NormalizedFormField;
 			onChange: ( value: any ) => void;
 			hideLabelFromVision?: boolean;
@@ -42,7 +52,14 @@ export function DataFormLayout< Item >( {
 	) => React.JSX.Element;
 	as?: React.ComponentType< { children: React.ReactNode } >;
 } ) {
-	const { fields: fieldDefinitions } = useContext( DataFormContext );
+	const {
+		fields: fieldDefinitions,
+		previousData: previousDataContext,
+		comparisonLayout: comparisonLayoutContext,
+	} = useContext( DataFormContext );
+
+	const previousData = previousDataProp ?? previousDataContext;
+	const comparisonLayout = comparisonLayoutProp ?? comparisonLayoutContext;
 
 	// Auto-compute: mark the minority of fields
 	// When counts are equal, mark required fields
@@ -80,13 +97,25 @@ export function DataFormLayout< Item >( {
 					? getFieldDefinition( formField )
 					: undefined;
 
-				if (
-					fieldDefinition &&
-					fieldDefinition.isVisible &&
-					! fieldDefinition.isVisible( data )
-				) {
-					return null;
+				if ( fieldDefinition && fieldDefinition.isVisible ) {
+					const isVisibleInCurrent =
+						fieldDefinition.isVisible( data );
+					const isVisibleInPrevious = previousData
+						? fieldDefinition.isVisible( previousData )
+						: false;
+					if ( ! isVisibleInCurrent && ! isVisibleInPrevious ) {
+						return null;
+					}
 				}
+
+				const fieldDiff =
+					fieldDefinition && previousData !== undefined
+						? computeFieldDiff(
+								fieldDefinition,
+								data,
+								previousData
+							)
+						: undefined;
 
 				if ( children ) {
 					return children(
@@ -101,6 +130,9 @@ export function DataFormLayout< Item >( {
 					<FieldLayout
 						key={ formField.id }
 						data={ data }
+						previousData={ previousData }
+						diff={ fieldDiff }
+						comparisonLayout={ comparisonLayout }
 						field={ formField }
 						onChange={ onChange }
 						markWhenOptional={ markWhenOptional }

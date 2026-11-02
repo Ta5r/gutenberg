@@ -14,6 +14,8 @@ import DataFormContext from '../../dataform-context';
 import { canRenderField } from '../can-render-field';
 import { DataFormLayout } from '../data-form-layout';
 import { DEFAULT_LAYOUT } from '../normalize-form';
+import DiffBadge from '../diff-badge';
+import FieldDiffRender from '../field-diff-render';
 
 function Header( { title }: { title: string } ) {
 	return (
@@ -33,13 +35,25 @@ function Header( { title }: { title: string } ) {
 
 export default function FormRegularField< Item >( {
 	data,
+	previousData: previousDataProp,
+	diff,
+	comparisonLayout: comparisonLayoutProp,
 	field,
 	onChange,
 	hideLabelFromVision,
 	markWhenOptional,
 	validity,
 }: FieldLayoutProps< Item > ) {
-	const { fields } = useContext( DataFormContext );
+	const {
+		fields,
+		previousData: previousDataContext,
+		comparisonLayout: comparisonLayoutContext,
+	} = useContext( DataFormContext );
+
+	const previousData = previousDataProp ?? previousDataContext;
+	const comparisonLayout = comparisonLayoutProp ?? comparisonLayoutContext;
+	const isComparison = previousData !== undefined;
+
 	const layout = field.layout as NormalizedRegularLayout;
 
 	const form: NormalizedForm = useMemo(
@@ -58,6 +72,8 @@ export default function FormRegularField< Item >( {
 				) }
 				<DataFormLayout
 					data={ data }
+					previousData={ previousData }
+					comparisonLayout={ comparisonLayout }
 					form={ form }
 					onChange={ onChange }
 					validity={ validity?.children }
@@ -75,11 +91,24 @@ export default function FormRegularField< Item >( {
 		return null;
 	}
 
+	const isReadOnly = isComparison || fieldDefinition.readOnly === true;
+
+	const labelWithDiff = (
+		<span className="dataforms-layouts-regular__field-label-wrapper">
+			<span>{ fieldDefinition.label }</span>
+			{ isComparison && <DiffBadge status={ diff?.status } /> }
+		</span>
+	);
+
 	if ( labelPosition === 'side' ) {
 		return (
 			<Stack
 				direction="row"
-				className="dataforms-layouts-regular__field"
+				className={ clsx(
+					'dataforms-layouts-regular__field',
+					isComparison && 'is-comparison',
+					diff?.status && `is-diff-${ diff.status }`
+				) }
 				gap="sm"
 			>
 				<div
@@ -89,14 +118,17 @@ export default function FormRegularField< Item >( {
 					) }
 				>
 					<BaseControl.VisualLabel>
-						{ fieldDefinition.label }
+						{ labelWithDiff }
 					</BaseControl.VisualLabel>
 				</div>
 				<div className="dataforms-layouts-regular__field-control">
-					{ fieldDefinition.readOnly === true ? (
-						<fieldDefinition.render
-							item={ data }
+					{ isReadOnly ? (
+						<FieldDiffRender
+							data={ data }
+							previousData={ previousData }
 							field={ fieldDefinition }
+							diff={ diff }
+							comparisonLayout={ comparisonLayout }
 						/>
 					) : (
 						fieldDefinition.Edit && (
@@ -117,20 +149,27 @@ export default function FormRegularField< Item >( {
 	}
 
 	return (
-		<div className="dataforms-layouts-regular__field">
-			{ fieldDefinition.readOnly === true ? (
+		<div
+			className={ clsx(
+				'dataforms-layouts-regular__field',
+				isComparison && 'is-comparison',
+				diff?.status && `is-diff-${ diff.status }`
+			) }
+		>
+			{ isReadOnly ? (
 				<>
-					<>
-						{ ! hideLabelFromVision && labelPosition !== 'none' && (
-							<BaseControl.VisualLabel>
-								{ fieldDefinition.label }
-							</BaseControl.VisualLabel>
-						) }
-						<fieldDefinition.render
-							item={ data }
-							field={ fieldDefinition }
-						/>
-					</>
+					{ ! hideLabelFromVision && labelPosition !== 'none' && (
+						<BaseControl.VisualLabel>
+							{ labelWithDiff }
+						</BaseControl.VisualLabel>
+					) }
+					<FieldDiffRender
+						data={ data }
+						previousData={ previousData }
+						field={ fieldDefinition }
+						diff={ diff }
+						comparisonLayout={ comparisonLayout }
+					/>
 				</>
 			) : (
 				fieldDefinition.Edit && (
