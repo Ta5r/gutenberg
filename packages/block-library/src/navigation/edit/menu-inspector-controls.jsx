@@ -100,6 +100,30 @@ const MenuInspectorControls = ( props ) => {
 	const { isSelectionWithinCurrentSection } =
 		useContext( PrivateBlockContext );
 
+	const { hasMultipleListViewBlocks } = useSelect(
+		( select ) => {
+			const {
+				getClientIdsOfDescendants,
+				shouldRenderBlockListView,
+				getParentSectionBlock,
+			} = unlock( select( blockEditorStore ) );
+
+			const sectionClientId = getParentSectionBlock( clientId );
+			if ( ! sectionClientId ) {
+				return { hasMultipleListViewBlocks: false };
+			}
+
+			const descendants = getClientIdsOfDescendants( sectionClientId );
+			const listViewBlocks = descendants.filter( ( id ) =>
+				shouldRenderBlockListView( id )
+			);
+			return {
+				hasMultipleListViewBlocks: listViewBlocks.length > 1,
+			};
+		},
+		[ clientId ]
+	);
+
 	const blockTitle = useBlockDisplayTitle( {
 		clientId,
 		context: 'list-view',
@@ -135,13 +159,14 @@ const MenuInspectorControls = ( props ) => {
 		);
 	}
 
-	// ContentOnly mode: use collapsible PanelBody
+	// ContentOnly mode: use collapsible PanelBody only if there are multiple blocks
 	return (
 		<InspectorControls group="list">
 			<PanelBody
 				title={ blockTitle }
 				opened={ isOpened }
 				onToggle={ handleToggle }
+				collapsible={ hasMultipleListViewBlocks }
 			>
 				{ blockEditingMode === 'default' && (
 					<NavigationMenuSelector

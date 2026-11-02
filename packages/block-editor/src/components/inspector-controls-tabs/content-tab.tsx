@@ -13,7 +13,7 @@ const ContentTab = ( {
 	}
 
 	return (
-		<PanelBody title={ __( 'Content' ) }>
+		<PanelBody title={ __( 'Content' ) } collapsible={ false }>
 			<BlockQuickNavigation
 				clientIds={ contentClientIds }
 				onSwitchToListView={ onSwitchToListView }

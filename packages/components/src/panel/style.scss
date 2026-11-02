@@ -78,10 +78,21 @@
 }
 
 // Hover States
-.components-panel__body > .components-panel__body-title:hover {
+.components-panel__body:not(.is-non-collapsible) > .components-panel__body-title:hover {
 	// Override the default button hover style
 	background: $gray-100;
 	border: none;
+}
+
+.components-panel__body-title-heading {
+	display: flex;
+	align-items: center;
+	padding: $grid-unit-20;
+	width: 100%;
+	font-weight: var(--wpds-typography-font-weight-emphasis);
+	text-align: left;
+	color: $gray-900;
+	box-sizing: border-box;
 }
 
 .components-panel__body-toggle.components-button {

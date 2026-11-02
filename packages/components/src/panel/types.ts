@@ -94,9 +94,23 @@ export type PanelBodyProps = {
 	 * @default true
 	 */
 	scrollAfterOpen?: boolean;
+	/**
+	 * Whether the panel body can be collapsed or expanded by the user.
+	 * When set to `false`, the title is displayed as a heading without the
+	 * expand/collapse arrow and toggle button, and content remains visible.
+	 *
+	 * @default true
+	 */
+	collapsible?: boolean;
 };
 
 export type PanelBodyTitleProps = Omit< ButtonAsButtonProps, 'icon' > & {
+	/**
+	 * Whether the panel body can be collapsed or expanded.
+	 *
+	 * @default true
+	 */
+	collapsible?: boolean;
 	/**
 	 * An icon to be shown next to the title.
 	 */

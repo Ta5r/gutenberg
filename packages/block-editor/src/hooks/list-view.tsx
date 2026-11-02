@@ -49,12 +49,19 @@ export function ListViewPanel( {
 		useDispatch( blockEditorStore )
 	);
 
-	const { isEnabled, hasChildren, isNestedListView } = useSelect(
+	const {
+		isEnabled,
+		hasChildren,
+		isNestedListView,
+		hasMultipleListViewBlocks,
+	} = useSelect(
 		( select ) => {
 			const {
 				getBlockCount,
 				getBlockParents,
 				shouldRenderBlockListView,
+				getParentSectionBlock,
+				getClientIdsOfDescendants,
 			} = unlock( select( blockEditorStore ) );
 
 			// Avoid showing List Views for both parent and child blocks that have support.
@@ -66,10 +73,22 @@ export function ListViewPanel( {
 				shouldRenderBlockListView( parentId )
 			);
 
+			const sectionClientId = getParentSectionBlock( clientId );
+			let _hasMultipleListViewBlocks = false;
+			if ( sectionClientId ) {
+				const descendants =
+					getClientIdsOfDescendants( sectionClientId );
+				const listViewBlocks = descendants.filter( ( id: string ) =>
+					shouldRenderBlockListView( id )
+				);
+				_hasMultipleListViewBlocks = listViewBlocks.length > 1;
+			}
+
 			return {
 				isEnabled: shouldRenderBlockListView( clientId ),
 				hasChildren: !! getBlockCount( clientId ),
 				isNestedListView: _isNestedListView,
+				hasMultipleListViewBlocks: _hasMultipleListViewBlocks,
 			};
 		},
 		[ clientId ]
@@ -90,6 +109,7 @@ export function ListViewPanel( {
 				title={ showBlockTitle ? title : undefined }
 				opened={ isOpened }
 				onToggle={ handleToggle }
+				collapsible={ hasMultipleListViewBlocks }
 			>
 				{ ! hasChildren && (
 					<p className="block-editor-block-inspector__no-blocks">

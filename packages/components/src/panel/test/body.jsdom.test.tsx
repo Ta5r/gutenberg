@@ -144,5 +144,41 @@ describe( 'PanelBody', () => {
 
 			expect( mock ).toHaveBeenCalled();
 		} );
+
+		it( 'should render non-collapsible panel title without toggle button', () => {
+			render(
+				<PanelBody title="Single Panel" collapsible={ false }>
+					<div data-testid="inner-content">Content</div>
+				</PanelBody>
+			);
+
+			// Should render the title as heading, not as an interactive button
+			expect(
+				screen.getByRole( 'heading', {
+					level: 2,
+					name: 'Single Panel',
+				} )
+			).toBeVisible();
+			expect(
+				screen.queryByRole( 'button', { name: 'Single Panel' } )
+			).not.toBeInTheDocument();
+			// Content is always visible
+			expect( screen.getByTestId( 'inner-content' ) ).toBeVisible();
+		} );
+
+		it( 'should remain visible when collapsible is false regardless of initialOpen or opened', () => {
+			render(
+				<PanelBody
+					title="Fixed Panel"
+					collapsible={ false }
+					opened={ false }
+					initialOpen={ false }
+				>
+					<div data-testid="inner-content">Always Open Content</div>
+				</PanelBody>
+			);
+
+			expect( screen.getByTestId( 'inner-content' ) ).toBeVisible();
+		} );
 	} );
 } );

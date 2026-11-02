@@ -24,11 +24,13 @@ export function UnforwardedPanelBody(
 		opened,
 		title,
 		scrollAfterOpen = true,
+		collapsible = true,
 	} = props;
 	const [ isOpened, setIsOpened ] = useControlledState< boolean | undefined >(
-		opened,
+		collapsible ? opened : true,
 		{
-			initial: initialOpen === undefined ? true : initialOpen,
+			initial:
+				! collapsible || initialOpen === undefined ? true : initialOpen,
 			fallback: false,
 		}
 	);
@@ -39,6 +41,9 @@ export function UnforwardedPanelBody(
 	const scrollBehavior = useReducedMotion() ? 'auto' : 'smooth';
 
 	const handleOnToggle = ( event: React.MouseEvent ) => {
+		if ( ! collapsible ) {
+			return;
+		}
 		event.preventDefault();
 		const next = ! isOpened;
 		setIsOpened( next );
@@ -70,6 +75,7 @@ export function UnforwardedPanelBody(
 
 	const classes = clsx( 'components-panel__body', className, {
 		'is-opened': isOpened,
+		'is-non-collapsible': ! collapsible,
 	} );
 
 	return (
@@ -77,6 +83,7 @@ export function UnforwardedPanelBody(
 			<PanelBodyTitle
 				icon={ icon }
 				isOpened={ Boolean( isOpened ) }
+				collapsible={ collapsible }
 				onClick={ handleOnToggle }
 				title={ title }
 				{ ...buttonProps }
@@ -94,12 +101,30 @@ const PanelBodyTitle = forwardRef(
 			isOpened,
 			icon,
 			title,
+			collapsible = true,
 			...props
 		}: WordPressComponentProps< PanelBodyTitleProps, 'button' >,
 		ref: React.ForwardedRef< any >
 	) => {
 		if ( ! title ) {
 			return null;
+		}
+
+		if ( ! collapsible ) {
+			return (
+				<h2 className="components-panel__body-title">
+					<span className="components-panel__body-title-heading">
+						{ title }
+						{ icon && (
+							<Icon
+								icon={ icon }
+								className="components-panel__icon"
+								size={ 20 }
+							/>
+						) }
+					</span>
+				</h2>
+			);
 		}
 
 		return (
