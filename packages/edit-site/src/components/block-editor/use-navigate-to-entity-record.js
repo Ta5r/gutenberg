@@ -37,13 +37,17 @@ export default function useNavigateToEntityRecord() {
 					currentPostId
 				);
 			const externalClientId =
-				entityEdits?.selection?.selectionStart?.clientId;
+				entityEdits?.selection?.selectionStart?.clientId ||
+				params.clientId;
 
 			const urlUpdates = { ...query };
 
 			// Store the selected block in the URL for restoration when navigating back.
 			if ( externalClientId ) {
 				urlUpdates.selectedBlock = externalClientId;
+				if ( params.returnInspectorTab ) {
+					urlUpdates.selectedBlockTab = params.returnInspectorTab;
+				}
 				history.navigate( addQueryArgs( path, urlUpdates ), {
 					replace: true,
 				} );

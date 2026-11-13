@@ -87,6 +87,8 @@ describe( 'ResponsiveWrapper', () => {
 			expect( mockOnNavigateToEntityRecord ).toHaveBeenCalledWith( {
 				postId: 'twentytwentyfive//my-overlay',
 				postType: 'wp_template_part',
+				clientId: 'test-navigation',
+				returnInspectorTab: 'settings',
 			} );
 			// Should not open default overlay when custom overlay is present
 			expect( mockOnToggle ).not.toHaveBeenCalled();
@@ -163,6 +165,8 @@ describe( 'ResponsiveWrapper', () => {
 			expect( mockOnNavigateToEntityRecord ).toHaveBeenCalledWith( {
 				postId: 'custom-theme//my-overlay',
 				postType: 'wp_template_part',
+				clientId: 'test-navigation',
+				returnInspectorTab: 'settings',
 			} );
 		} );
 	} );

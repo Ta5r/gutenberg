@@ -427,6 +427,10 @@ export type Settings = Record< string | symbol, unknown > & {
 		postType: string;
 		/** The canvas viewport to open the entity in, such as `mobile`. */
 		viewport?: string;
+		/** Optional block client ID to select upon return. */
+		clientId?: string;
+		/** Optional inspector tab name to activate upon return. */
+		returnInspectorTab?: string;
 		[ key: string ]: unknown;
 	} ) => void;
 	__experimentalUndo?: () => void;

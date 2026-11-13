@@ -92,6 +92,8 @@ export default function ResponsiveWrapper( {
 			onNavigateToEntityRecord( {
 				postId: templatePartId,
 				postType: 'wp_template_part',
+				clientId: id,
+				returnInspectorTab: 'settings',
 			} );
 			return;
 		}

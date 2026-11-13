@@ -429,6 +429,7 @@ describe( 'OverlayTemplatePartSelector', () => {
 			expect( mockOnNavigateToEntityRecord ).toHaveBeenCalledWith( {
 				postId: 'twentytwentyfive//my-overlay',
 				postType: 'wp_template_part',
+				returnInspectorTab: 'settings',
 			} );
 		} );
 
@@ -558,6 +559,7 @@ describe( 'OverlayTemplatePartSelector', () => {
 			expect( mockOnNavigateToEntityRecord ).toHaveBeenCalledWith( {
 				postId: 'twentytwentyfive//overlay',
 				postType: 'wp_template_part',
+				returnInspectorTab: 'settings',
 			} );
 		} );
 

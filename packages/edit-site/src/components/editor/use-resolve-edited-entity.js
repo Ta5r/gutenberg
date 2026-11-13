@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
+import { store as blockEditorStore } from '@wordpress/block-editor';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { store as editSiteStore } from '../../store';
 import { unlock } from '../../lock-unlock';
@@ -47,12 +48,14 @@ function getPostType( name ) {
 
 export function useResolveEditedEntity() {
 	const { editEntityRecord } = useDispatch( coreDataStore );
+	const { openGeneralSidebar } = useDispatch( editSiteStore );
+	const { requestInspectorTab } = unlock( useDispatch( blockEditorStore ) );
 	const { hasEntityRecord } = useSelect( coreDataStore );
 	const { name, params = {}, query } = useLocation();
 	const { postId = query?.postId } = params; // Fallback to query param for postId for list view routes.
 	const postType = getPostType( name, postId ) ?? query?.postType;
-	// Extract selectedBlock from URL for selection restoration on navigation back.
-	const { selectedBlock } = query;
+	// Extract selectedBlock and selectedBlockTab from URL for selection restoration on navigation back.
+	const { selectedBlock, selectedBlockTab } = query;
 
 	// Track which selection we've applied to avoid re-applying the same one,
 	// but allow applying a new one if the URL changes.
@@ -175,6 +178,11 @@ export function useResolveEditedEntity() {
 				{ undoIgnore: true }
 			);
 			appliedSelectionRef.current = selectedBlock;
+
+			if ( selectedBlockTab ) {
+				openGeneralSidebar( 'edit-post/block' );
+				requestInspectorTab( selectedBlockTab );
+			}
 		}
 	}
 

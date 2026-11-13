@@ -33,6 +33,8 @@ interface NavigateParams {
 	postType: string;
 	postId: string;
 	viewport?: string;
+	clientId?: string;
+	returnInspectorTab?: string;
 }
 
 /**
@@ -77,13 +79,17 @@ export default function useNavigateToEntityRecord() {
 					currentPostType,
 					currentPostId
 				) as { selection?: { selectionStart?: { clientId?: string } } };
-			const selectedBlock = edits?.selection?.selectionStart?.clientId;
+			const selectedBlock =
+				edits?.selection?.selectionStart?.clientId || params.clientId;
 
 			if ( selectedBlock ) {
 				navigate( {
 					search: ( previous: Record< string, unknown > ) => ( {
 						...previous,
 						selectedBlock,
+						...( params.returnInspectorTab
+							? { selectedBlockTab: params.returnInspectorTab }
+							: {} ),
 					} ),
 					replace: true,
 				} );

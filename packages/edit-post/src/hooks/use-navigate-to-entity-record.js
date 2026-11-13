@@ -2,6 +2,9 @@ import { useCallback, useReducer } from '@wordpress/element';
 import { useSelect, useDispatch, useRegistry } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 import { store as coreStore } from '@wordpress/core-data';
+import { store as blockEditorStore } from '@wordpress/block-editor';
+import { store as editPostStore } from '../store';
+import { unlock } from '../lock-unlock';
 
 /**
  * A hook that records the 'entity' history in the post editor as a user
@@ -27,15 +30,22 @@ export default function useNavigateToEntityRecord(
 	const [ postHistory, dispatch ] = useReducer(
 		(
 			historyState,
-			{ type, post, previousRenderingMode, selectedBlockClientId }
+			{
+				type,
+				post,
+				previousRenderingMode,
+				selectedBlockClientId,
+				returnInspectorTab,
+			}
 		) => {
 			if ( type === 'push' ) {
-				// Update the current item with the selected block clientId before pushing new item
+				// Update the current item with the selected block clientId and return tab before pushing new item
 				const updatedHistory = [ ...historyState ];
 				const currentIndex = updatedHistory.length - 1;
 				updatedHistory[ currentIndex ] = {
 					...updatedHistory[ currentIndex ],
 					selectedBlockClientId,
+					returnInspectorTab,
 				};
 				return [ ...updatedHistory, { post, previousRenderingMode } ];
 			}
@@ -74,7 +84,9 @@ export default function useNavigateToEntityRecord(
 				post: { postId: params.postId, postType: params.postType },
 				// Save the current rendering mode so we can restore it when navigating back.
 				previousRenderingMode: getRenderingMode(),
-				selectedBlockClientId: externalClientId,
+				selectedBlockClientId:
+					externalClientId ?? params.clientId ?? null,
+				returnInspectorTab: params.returnInspectorTab,
 			} );
 			setRenderingMode( defaultRenderingMode );
 		},
@@ -112,6 +124,15 @@ export default function useNavigateToEntityRecord(
 					},
 					{ undoIgnore: true }
 				);
+
+				if ( previousItem.returnInspectorTab ) {
+					registry
+						.dispatch( editPostStore )
+						.openGeneralSidebar( 'edit-post/block' );
+					unlock(
+						registry.dispatch( blockEditorStore )
+					).requestInspectorTab( previousItem.returnInspectorTab );
+				}
 			}
 		}
 		dispatch( {
@@ -121,6 +142,7 @@ export default function useNavigateToEntityRecord(
 			setRenderingMode( previousRenderingMode );
 		}
 	}, [
+		registry,
 		setRenderingMode,
 		previousRenderingMode,
 		postHistory,

@@ -162,6 +162,7 @@ export default function OverlayTemplatePartSelector( {
 		const params = {
 			postId: templatePartId,
 			postType: 'wp_template_part',
+			returnInspectorTab: 'settings',
 		};
 		if ( overlayMenu === 'mobile' ) {
 			params.viewport = 'mobile';
@@ -190,6 +191,7 @@ export default function OverlayTemplatePartSelector( {
 				const params = {
 					postId: templatePartId,
 					postType: 'wp_template_part',
+					returnInspectorTab: 'settings',
 				};
 				if ( overlayMenu === 'mobile' ) {
 					params.viewport = 'mobile';
