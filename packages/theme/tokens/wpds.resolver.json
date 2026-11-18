@@ -6,6 +6,7 @@
 		"base": {
 			"sources": [
 				{ "$ref": "border.json" },
+				{ "$ref": "breakpoint.json" },
 				{ "$ref": "color.json" },
 				{ "$ref": "cursor.json" },
 				{ "$ref": "dimension.json" },

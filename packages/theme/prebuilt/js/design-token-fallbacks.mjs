@@ -13,6 +13,12 @@ export default {
 	'--wpds-border-width-md': '4px',
 	'--wpds-border-width-sm': '2px',
 	'--wpds-border-width-xs': '1px',
+	'--wpds-breakpoint-2xl': '1440px',
+	'--wpds-breakpoint-lg': '960px',
+	'--wpds-breakpoint-md': '782px',
+	'--wpds-breakpoint-sm': '600px',
+	'--wpds-breakpoint-xl': '1280px',
+	'--wpds-breakpoint-xs': '480px',
 	'--wpds-color-background-indicator-brand':
 		'var(--wp-admin-theme-color, #3858e9)',
 	'--wpds-color-background-indicator-error': '#9c0000',

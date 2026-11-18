@@ -4,6 +4,11 @@
  */
 
 /**
+ * Size scale for viewport and container breakpoint tokens.
+ */
+export type Breakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+
+/**
  * Size scale for padding tokens.
  */
 export type PaddingSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';

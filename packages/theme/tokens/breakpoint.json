@@ -1,0 +1,29 @@
+{
+	"wpds-breakpoint": {
+		"$type": "dimension",
+		"xs": {
+			"$value": { "value": 480, "unit": "px" },
+			"$description": "Extra small breakpoint for mobile landscape and narrow containers."
+		},
+		"sm": {
+			"$value": { "value": 600, "unit": "px" },
+			"$description": "Small breakpoint for compact multi-column layouts and mobile input adjustments."
+		},
+		"md": {
+			"$value": { "value": 782, "unit": "px" },
+			"$description": "Medium breakpoint aligned with tablets and WordPress admin bar expansion."
+		},
+		"lg": {
+			"$value": { "value": 960, "unit": "px" },
+			"$description": "Large breakpoint aligned with small desktops and WordPress admin sidebar auto-fold."
+		},
+		"xl": {
+			"$value": { "value": 1280, "unit": "px" },
+			"$description": "Extra large breakpoint for standard wide desktop layouts."
+		},
+		"2xl": {
+			"$value": { "value": 1440, "unit": "px" },
+			"$description": "2x extra large breakpoint for large desktop displays."
+		}
+	}
+}

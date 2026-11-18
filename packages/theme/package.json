@@ -40,6 +40,7 @@
 			"default": "./build-module/index.mjs"
 		},
 		"./design-tokens.css": "./prebuilt/css/design-tokens.css",
+		"./breakpoints.css": "./prebuilt/css/breakpoints.css",
 		"./design-tokens.js": {
 			"types": "./build-types/prebuilt/js/design-tokens.d.mts",
 			"default": "./prebuilt/js/design-tokens.mjs"

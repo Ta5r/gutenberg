@@ -188,6 +188,17 @@ The semantic token set is role-based, not a complete matrix of every property, t
 | `--wpds-border-width-lg`    | Large width                                                   |
 | `--wpds-border-width-focus` | Border width for focus ring                                   |
 
+### Breakpoint
+
+| Variable name           | Description                                                                         |
+| ----------------------- | ----------------------------------------------------------------------------------- |
+| `--wpds-breakpoint-xs`  | Extra small breakpoint for mobile landscape and narrow containers.                  |
+| `--wpds-breakpoint-sm`  | Small breakpoint for compact multi-column layouts and mobile input adjustments.     |
+| `--wpds-breakpoint-md`  | Medium breakpoint aligned with tablets and WordPress admin bar expansion.           |
+| `--wpds-breakpoint-lg`  | Large breakpoint aligned with small desktops and WordPress admin sidebar auto-fold. |
+| `--wpds-breakpoint-xl`  | Extra large breakpoint for standard wide desktop layouts.                           |
+| `--wpds-breakpoint-2xl` | 2x extra large breakpoint for large desktop displays.                               |
+
 ### Color
 
 | Variable name                                                 | Description                                                                                                                      |

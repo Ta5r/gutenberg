@@ -5,6 +5,7 @@ import pluginTokenData from './bin/terrazzo-plugin-token-data/index.ts';
 import pluginDsTokenDocs from './bin/terrazzo-plugin-ds-tokens-docs/index.ts';
 import inlineAliasValues from './bin/terrazzo-plugin-inline-alias-values/index.ts';
 import typescriptTypes from './bin/terrazzo-plugin-typescript-types/index.ts';
+import pluginBreakpoints from './bin/terrazzo-plugin-breakpoints/index.ts';
 import { SEMANTIC_COLOR_CONTRAST_PAIRS } from './src/semantic-color-contrast-pairs.ts';
 
 const cornerRadiusPermutations = [
@@ -81,9 +82,19 @@ const config: Config = {
 		pluginDsTokenDocs( {
 			filename: 'docs/tokens.md',
 		} ),
+		pluginBreakpoints( {
+			tsFilename: 'src/prebuilt/ts/breakpoints.ts',
+			cssFilename: 'prebuilt/css/breakpoints.css',
+		} ),
 		typescriptTypes( {
 			filename: 'src/prebuilt/ts/token-types.ts',
 			types: [
+				{
+					name: 'Breakpoint',
+					description:
+						'Size scale for viewport and container breakpoint tokens.',
+					patterns: [ /^wpds-breakpoint\.([^.]+)$/ ],
+				},
 				{
 					name: 'PaddingSize',
 					description: 'Size scale for padding tokens.',

@@ -155,6 +155,101 @@ export const tokens = /** @type {const} */ ( {
 			},
 		},
 	},
+	'--wpds-breakpoint-xs': {
+		$description:
+			'Extra small breakpoint for mobile landscape and narrow containers.',
+		$type: 'dimension',
+		group: 'breakpoint',
+		fallback: '480px',
+		modes: {
+			default: {
+				$value: {
+					value: 480,
+					unit: 'px',
+				},
+				css: '480px',
+			},
+		},
+	},
+	'--wpds-breakpoint-sm': {
+		$description:
+			'Small breakpoint for compact multi-column layouts and mobile input adjustments.',
+		$type: 'dimension',
+		group: 'breakpoint',
+		fallback: '600px',
+		modes: {
+			default: {
+				$value: {
+					value: 600,
+					unit: 'px',
+				},
+				css: '600px',
+			},
+		},
+	},
+	'--wpds-breakpoint-md': {
+		$description:
+			'Medium breakpoint aligned with tablets and WordPress admin bar expansion.',
+		$type: 'dimension',
+		group: 'breakpoint',
+		fallback: '782px',
+		modes: {
+			default: {
+				$value: {
+					value: 782,
+					unit: 'px',
+				},
+				css: '782px',
+			},
+		},
+	},
+	'--wpds-breakpoint-lg': {
+		$description:
+			'Large breakpoint aligned with small desktops and WordPress admin sidebar auto-fold.',
+		$type: 'dimension',
+		group: 'breakpoint',
+		fallback: '960px',
+		modes: {
+			default: {
+				$value: {
+					value: 960,
+					unit: 'px',
+				},
+				css: '960px',
+			},
+		},
+	},
+	'--wpds-breakpoint-xl': {
+		$description:
+			'Extra large breakpoint for standard wide desktop layouts.',
+		$type: 'dimension',
+		group: 'breakpoint',
+		fallback: '1280px',
+		modes: {
+			default: {
+				$value: {
+					value: 1280,
+					unit: 'px',
+				},
+				css: '1280px',
+			},
+		},
+	},
+	'--wpds-breakpoint-2xl': {
+		$description: '2x extra large breakpoint for large desktop displays.',
+		$type: 'dimension',
+		group: 'breakpoint',
+		fallback: '1440px',
+		modes: {
+			default: {
+				$value: {
+					value: 1440,
+					unit: 'px',
+				},
+				css: '1440px',
+			},
+		},
+	},
 	'--wpds-color-background-surface-neutral': {
 		$description: 'Background color for surfaces with normal emphasis.',
 		$type: 'color',
@@ -3008,6 +3103,17 @@ export const groups = /** @type {const} */ ( {
 					'Thickness of borders, dividers, and focus rings.',
 			},
 		},
+	},
+	breakpoint: {
+		tokens: [
+			'--wpds-breakpoint-xs',
+			'--wpds-breakpoint-sm',
+			'--wpds-breakpoint-md',
+			'--wpds-breakpoint-lg',
+			'--wpds-breakpoint-xl',
+			'--wpds-breakpoint-2xl',
+		],
+		groups: {},
 	},
 	color: {
 		tokens: [],
