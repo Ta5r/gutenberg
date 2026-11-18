@@ -65,6 +65,10 @@ const RAW_PRESETS = {
 		{ slug: 'rounded', size: '8px', name: 'Rounded' },
 		{ slug: 'pill', size: '999px', name: 'Pill' },
 	],
+	widthSizes: [
+		{ slug: 'sm', size: '0.0625rem', name: 'Small' },
+		{ slug: 'md', size: '0.125rem', name: 'Medium' },
+	],
 };
 
 const FEATURES = {
@@ -80,6 +84,7 @@ const FEATURES = {
 		},
 		border: {
 			radiusSizes: { theme: RAW_PRESETS.radiusSizes },
+			widthSizes: { theme: RAW_PRESETS.widthSizes },
 		},
 	},
 	styles: {
@@ -96,6 +101,7 @@ const FEATURES = {
 		},
 		border: {
 			radius: '8px',
+			width: '0.125rem',
 		},
 	},
 };
@@ -103,6 +109,7 @@ const FEATURES = {
 const PRESETS = {
 	spacing: RAW_PRESETS.spacingSizes,
 	'border-radius': RAW_PRESETS.radiusSizes,
+	'border-width': RAW_PRESETS.widthSizes,
 };
 
 /**
@@ -392,6 +399,64 @@ describe( 'border-radius preset round-trip', () => {
 	it( 'isValuePreset recognises the canonical form', () => {
 		expect( isValueRadiusPreset( expectedPresetVar ) ).toBe( true );
 		expect( isValueRadiusPreset( '8px' ) ).toBe( false );
+	} );
+} );
+
+// ---------------------------------------------------------------------------
+// BORDER-WIDTH — decodes var:preset|border-width|<slug> and
+// var(--wp--preset--border-width--<slug>) via getValueFromVariable and
+// preset-input-control helpers.
+// ---------------------------------------------------------------------------
+describe( 'border-width preset round-trip', () => {
+	const BORDER_WIDTH_PRESET_TYPE = 'border-width';
+	const stylePath = 'border.width';
+	const slugAttr = null;
+	const expectedResolved = '0.125rem';
+	const expectedPresetVar = 'var:preset|border-width|md';
+	const presets = PRESETS[ 'border-width' ];
+
+	it( 'decodes var:preset|border-width|<slug> via getValueFromVariable', () => {
+		expect(
+			getValueFromVariable( FEATURES, undefined, expectedPresetVar )
+		).toBe( expectedResolved );
+	} );
+
+	it( 'decodes var(--wp--preset--border-width--<slug>) via getValueFromVariable', () => {
+		expect(
+			getValueFromVariable(
+				FEATURES,
+				undefined,
+				'var(--wp--preset--border-width--md)'
+			)
+		).toBe( expectedResolved );
+	} );
+
+	it( 'decodes { ref: … } via getValueFromVariable', () => {
+		expect(
+			getValueFromVariable( FEATURES, undefined, {
+				ref: 'styles.border.width',
+			} )
+		).toBe( expectedResolved );
+	} );
+
+	it( 'encodes a resolved override back to var:preset|border-width|<slug>', () => {
+		expect(
+			getPresetValueFromCustomValue(
+				expectedResolved,
+				presets,
+				BORDER_WIDTH_PRESET_TYPE
+			)
+		).toBe( expectedPresetVar );
+	} );
+
+	it( 'full-reset clears style.border.width', () => {
+		const before = {
+			style: {
+				border: { width: expectedPresetVar },
+			},
+		};
+		const after = simulateResetAll( before, slugAttr, stylePath );
+		expect( after.style.border.width ).toBeUndefined();
 	} );
 } );
 

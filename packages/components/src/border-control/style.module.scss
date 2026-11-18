@@ -19,6 +19,10 @@
 		flex: 1 1 40%;
 	}
 
+	:global(.components-select-control) {
+		flex: 1 1 auto;
+	}
+
 	/* Preserve the established specificity for UnitSelect's min-height override. */
 	&#{&}
 	:global(.components-unit-control__select):global(.components-unit-control__select) {

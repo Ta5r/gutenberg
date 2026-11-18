@@ -18,6 +18,7 @@ const BorderBoxControlSplitControls = (
 		centeredClassName,
 		colors,
 		disableCustomColors,
+		disableCustomWidth,
 		enableAlpha,
 		enableStyle,
 		onChange,
@@ -25,6 +26,7 @@ const BorderBoxControlSplitControls = (
 		popoverOffset,
 		rightAlignedClassName,
 		value,
+		widthPresets,
 		__experimentalIsRenderedInSidebar,
 		...otherProps
 	} = useBorderBoxControlSplitControls( props );
@@ -53,9 +55,11 @@ const BorderBoxControlSplitControls = (
 	const sharedBorderControlProps = {
 		colors,
 		disableCustomColors,
+		disableCustomWidth,
 		enableAlpha,
 		enableStyle,
 		isCompact: true,
+		widthPresets,
 		__experimentalIsRenderedInSidebar,
 	};
 

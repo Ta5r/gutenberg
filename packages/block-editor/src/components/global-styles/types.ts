@@ -48,10 +48,12 @@ export interface StyleSettings {
 	};
 	border?: Record< string, unknown > & {
 		color?: boolean;
+		customWidth?: boolean;
 		radius?: boolean;
 		style?: boolean;
 		width?: boolean;
 		radiusSizes?: Record< string, RadiusSizePreset[] >;
+		widthSizes?: Record< string, BorderWidthSizePreset[] >;
 	};
 	color?: Record< string, unknown > & {
 		palette?: PresetsPerOrigin< Color >;
@@ -506,6 +508,12 @@ export interface FiltersPanelProps {
  * A border radius preset from theme.json.
  */
 export interface RadiusSizePreset {
+	name: string;
+	slug: string;
+	size: string;
+}
+
+export interface BorderWidthSizePreset {
 	name: string;
 	slug: string;
 	size: string;

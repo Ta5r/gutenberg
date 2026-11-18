@@ -611,4 +611,93 @@ describe( 'BorderControl', () => {
 			} );
 		} );
 	} );
+
+	describe( 'width presets and customWidth', () => {
+		const widthPresets = [
+			{ name: 'Small', slug: 'sm', size: '0.0625rem' },
+			{ name: 'Medium', slug: 'md', size: '0.125rem' },
+			{ name: 'Large', slug: 'lg', size: '0.25rem' },
+		];
+
+		it( 'renders a preset selector and selects a preset width', async () => {
+			const user = userEvent.setup();
+			const props = createProps( {
+				value: { color: '#72aee6', style: 'solid' },
+				widthPresets,
+			} );
+
+			render( <TestBorderControl { ...props } /> );
+
+			const select = screen.getByRole( 'combobox', {
+				name: 'Border width',
+			} );
+			expect( select ).toHaveValue( '' );
+
+			await user.selectOptions( select, '0.125rem' );
+
+			expect( props.onChange ).toHaveBeenCalledWith( {
+				color: '#72aee6',
+				style: 'solid',
+				width: '0.125rem',
+			} );
+		} );
+
+		it( 'allows toggling between preset selector and custom input when custom width is enabled', async () => {
+			const user = userEvent.setup();
+			const props = createProps( {
+				value: { color: '#72aee6', style: 'solid', width: '0.125rem' },
+				widthPresets,
+			} );
+
+			render( <TestBorderControl { ...props } /> );
+
+			const toggleButton = screen.getByRole( 'button', {
+				name: 'Set custom value',
+			} );
+			await user.click( toggleButton );
+
+			expect( getWidthInput() ).toBeInTheDocument();
+			expect(
+				screen.getByRole( 'button', { name: 'Use preset' } )
+			).toBeInTheDocument();
+		} );
+
+		it( 'hides custom width input and toggle button when disableCustomWidth is true', () => {
+			const props = createProps( {
+				value: { color: '#72aee6', style: 'solid', width: '0.125rem' },
+				widthPresets,
+				disableCustomWidth: true,
+			} );
+
+			render( <TestBorderControl { ...props } /> );
+
+			expect(
+				screen.getByRole( 'combobox', { name: 'Border width' } )
+			).toHaveValue( '0.125rem' );
+			expect(
+				screen.queryByRole( 'spinbutton', { name: 'Border width' } )
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByRole( 'button', { name: 'Set custom value' } )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'displays existing legacy custom widths in the selector when disableCustomWidth is true', () => {
+			const props = createProps( {
+				value: { color: '#72aee6', style: 'solid', width: '3px' },
+				widthPresets,
+				disableCustomWidth: true,
+			} );
+
+			render( <TestBorderControl { ...props } /> );
+
+			const select = screen.getByRole( 'combobox', {
+				name: 'Border width',
+			} );
+			expect( select ).toHaveValue( '3px' );
+			expect(
+				screen.getByRole( 'option', { name: 'Custom (3px)' } )
+			).toBeInTheDocument();
+		} );
+	} );
 } );

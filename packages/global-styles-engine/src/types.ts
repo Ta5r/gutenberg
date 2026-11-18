@@ -217,10 +217,12 @@ export interface SpacingSettings {
  */
 export interface BorderSettings {
 	color?: boolean;
+	customWidth?: boolean;
 	radius?: boolean;
 	style?: boolean;
 	width?: boolean;
 	radiusSizes?: SizePreset[] | Record< string, SizePreset[] >;
+	widthSizes?: SizePreset[] | Record< string, SizePreset[] >;
 }
 
 /**

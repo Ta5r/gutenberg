@@ -116,6 +116,26 @@ export default function BorderPanel( {
 	const colors = useColorsPerOrigin( settings );
 	const itemPopoverProps = useToolsPanelItemPopoverProps();
 	const areCustomSolidsEnabled = settings?.color?.custom;
+	const areCustomWidthsEnabled = settings?.border?.customWidth ?? true;
+	const widthPresets = useMemo( () => {
+		const raw = settings?.border?.widthSizes;
+		if ( ! raw ) {
+			return [];
+		}
+		if ( Array.isArray( raw ) ) {
+			return raw;
+		}
+		const ordered = [
+			...( raw.default ?? [] ),
+			...( raw.theme ?? [] ),
+			...( raw.custom ?? [] ),
+		];
+		const bySlug = new Map< string, ( typeof ordered )[ number ] >();
+		ordered.forEach( ( preset ) => {
+			bySlug.set( preset.slug, preset );
+		} );
+		return Array.from( bySlug.values() );
+	}, [ settings?.border?.widthSizes ] );
 	const decodeValue = useCallback(
 		( rawValue: StyleValue ) =>
 			getValueFromVariable( { settings }, '', rawValue ),
@@ -132,6 +152,17 @@ export default function BorderPanel( {
 			? 'var:preset|color|' + colorObject.slug
 			: colorValue;
 	};
+	const encodeWidthValue = ( widthValue: StyleValue ) => {
+		if ( ! widthValue ) {
+			return widthValue;
+		}
+		const widthObject = widthPresets.findLast(
+			( { size } ) => String( size ) === String( widthValue )
+		);
+		return widthObject
+			? 'var:preset|border-width|' + widthObject.slug
+			: widthValue;
+	};
 	// Decode a `border` sub-tree (handles split borders + flat shape).
 	const decodeBorder = useCallback(
 		( source: PanelBorderStyle | undefined ): BorderBoxValue => {
@@ -146,16 +177,20 @@ export default function BorderPanel( {
 						out[ side ] = {
 							...out[ side ],
 							color: decodeValue( out[ side ]?.color ),
+							width: out[ side ]?.width
+								? decodeValue( out[ side ]?.width )
+								: undefined,
 						};
 					}
 				);
-				// The decoded border holds the colors the control shows.
+				// The decoded border holds the colors and widths the control shows.
 				return out as BorderBoxValue;
 			}
-			// The decoded border holds the colors the control shows.
+			// The decoded border holds the colors and widths the control shows.
 			return {
 				...source,
 				color: source.color ? decodeValue( source.color ) : undefined,
+				width: source.width ? decodeValue( source.width ) : undefined,
 			} as BorderBoxValue;
 		},
 		[ decodeValue ]
@@ -356,12 +391,16 @@ export default function BorderPanel( {
 							color: encodeColorValue(
 								updatedBorder[ side ]?.color
 							),
+							width: encodeWidthValue(
+								updatedBorder[ side ]?.width
+							),
 						};
 					}
 				}
 			);
 		} else if ( updatedBorder ) {
 			updatedBorder.color = encodeColorValue( updatedBorder.color );
+			updatedBorder.width = encodeWidthValue( updatedBorder.width );
 		}
 
 		// As radius is maintained separately to color, style, and width
@@ -426,6 +465,7 @@ export default function BorderPanel( {
 					<BorderBoxControl
 						colors={ colors }
 						disableCustomColors={ ! areCustomSolidsEnabled }
+						disableCustomWidth={ ! areCustomWidthsEnabled }
 						enableAlpha
 						enableStyle={ showBorderStyle }
 						label={ __( 'Border' ) }
@@ -433,6 +473,7 @@ export default function BorderPanel( {
 						popoverOffset={ itemPopoverProps.offset }
 						popoverPlacement={ itemPopoverProps.placement }
 						value={ border }
+						widthPresets={ widthPresets }
 						__experimentalIsRenderedInSidebar
 					/>
 				</ToolsPanelItem>

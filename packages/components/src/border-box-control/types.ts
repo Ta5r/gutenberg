@@ -21,7 +21,11 @@ export type BorderBoxControlProps = ColorProps &
 	LabelProps &
 	Pick<
 		BorderControlProps,
-		'enableStyle' | '__next40pxDefaultSize' | 'size'
+		| 'disableCustomWidth'
+		| 'enableStyle'
+		| 'widthPresets'
+		| '__next40pxDefaultSize'
+		| 'size'
 	> & {
 		/**
 		 * A callback function invoked when any border value is changed. The value
@@ -74,7 +78,10 @@ export type VisualizerProps = {
 };
 
 export type SplitControlsProps = ColorProps &
-	Pick< BorderBoxControlProps, 'enableStyle' > & {
+	Pick<
+		BorderBoxControlProps,
+		'disableCustomWidth' | 'enableStyle' | 'widthPresets'
+	> & {
 		/**
 		 * A callback that is invoked whenever an individual side's border has
 		 * changed.

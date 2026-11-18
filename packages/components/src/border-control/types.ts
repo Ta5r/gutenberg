@@ -9,6 +9,12 @@ export type Border = {
 	width?: CSSProperties[ 'borderWidth' ];
 };
 
+export type BorderWidthPreset = {
+	name: string;
+	slug: string;
+	size: string;
+};
+
 export type ColorProps = Pick<
 	ColorPaletteProps,
 	'colors' | '__experimentalIsRenderedInSidebar'
@@ -44,6 +50,16 @@ export type BorderControlProps = ColorProps &
 		 * This controls whether unit selection should be disabled.
 		 */
 		disableUnits?: boolean;
+		/**
+		 * Disables custom border width input when set to `true`.
+		 *
+		 * @default false
+		 */
+		disableCustomWidth?: boolean;
+		/**
+		 * An array of preset border widths to offer in a selector.
+		 */
+		widthPresets?: BorderWidthPreset[];
 		/**
 		 * This controls whether to support border style selection.
 		 *

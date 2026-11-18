@@ -652,3 +652,114 @@ describe( 'BorderPanel — shadow preset persistence', () => {
 		} );
 	} );
 } );
+
+describe( 'BorderPanel — border width presets and customWidth', () => {
+	const widthSizes = {
+		theme: [
+			{ name: 'Small', slug: 'sm', size: '0.0625rem' },
+			{ name: 'Medium', slug: 'md', size: '0.125rem' },
+			{ name: 'Large', slug: 'lg', size: '0.25rem' },
+		],
+	};
+
+	it( 'encodes selected border width presets as var:preset|border-width|<slug> and disables custom input when customWidth is false', async () => {
+		const user = userEvent.setup();
+		const onChange = vi.fn();
+
+		render(
+			<BorderPanel
+				value={ {} }
+				settings={ {
+					border: {
+						color: true,
+						style: true,
+						width: true,
+						customWidth: false,
+						widthSizes,
+					},
+				} }
+				onChange={ onChange }
+				panelId="test-panel"
+			/>
+		);
+
+		const select = screen.getByRole( 'combobox', {
+			name: 'Border width',
+		} );
+		expect(
+			screen.queryByRole( 'button', { name: 'Set custom value' } )
+		).not.toBeInTheDocument();
+
+		await user.selectOptions( select, '0.125rem' );
+
+		expect( onChange ).toHaveBeenCalledWith( {
+			border: {
+				color: undefined,
+				style: undefined,
+				width: 'var:preset|border-width|md',
+				radius: undefined,
+			},
+		} );
+	} );
+
+	it( 'decodes stored var:preset|border-width|<slug> values for display in flat and split borders', () => {
+		const { rerender } = render(
+			<BorderPanel
+				value={ {
+					border: {
+						width: 'var:preset|border-width|lg',
+						style: 'solid',
+					},
+				} }
+				settings={ {
+					border: {
+						color: true,
+						style: true,
+						width: true,
+						customWidth: false,
+						widthSizes,
+					},
+				} }
+				onChange={ vi.fn() }
+				panelId="test-panel"
+			/>
+		);
+
+		expect(
+			screen.getByRole( 'combobox', { name: 'Border width' } )
+		).toHaveValue( '0.25rem' );
+
+		rerender(
+			<BorderPanel
+				value={ {
+					border: {
+						top: {
+							width: 'var:preset|border-width|sm',
+							style: 'solid',
+						},
+						bottom: {
+							width: 'var:preset|border-width|lg',
+							style: 'solid',
+						},
+					},
+				} }
+				settings={ {
+					border: {
+						color: true,
+						style: true,
+						width: true,
+						customWidth: false,
+						widthSizes,
+					},
+				} }
+				onChange={ vi.fn() }
+				panelId="test-panel"
+			/>
+		);
+
+		// Mixed split borders decode each side independently.
+		expect(
+			screen.getByRole( 'combobox', { name: 'Border width' } )
+		).toBeInTheDocument();
+	} );
+} );

@@ -1,5 +1,8 @@
 import { __ } from '@wordpress/i18n';
+import { settings as settingsIcon } from '@wordpress/icons';
 import BorderControlDropdown from '../border-control-dropdown';
+import Button from '../../button';
+import SelectControl from '../../select-control';
 import UnitControl from '../../unit-control';
 import { CSS_UNITS } from '../../unit-control/utils';
 import RangeControl from '../../range-control';
@@ -37,9 +40,11 @@ const UnconnectedBorderControl = (
 	const {
 		colors,
 		disableCustomColors,
+		disableCustomWidth,
 		disableUnits,
 		enableAlpha,
 		enableStyle,
+		hasWidthPresets,
 		hideLabelFromVision,
 		innerWrapperClassName,
 		inputWidth,
@@ -51,15 +56,38 @@ const UnconnectedBorderControl = (
 		placeholder,
 		__unstablePopoverProps,
 		previousStyleSelection,
+		selectedWidthPresetValue,
+		showCustomWidth,
 		showDropdownHeader,
 		sliderClassName,
+		toggleCustomWidth,
 		value: border,
+		widthPresetOptions,
 		widthUnit,
 		widthValue,
 		withSlider,
 		__experimentalIsRenderedInSidebar,
 		...otherProps
 	} = useBorderControl( props );
+
+	const dropdownPrefix = (
+		<Spacer marginRight={ 1 } marginBottom={ 0 }>
+			<BorderControlDropdown
+				border={ border }
+				colors={ colors }
+				__unstablePopoverProps={ __unstablePopoverProps }
+				disableCustomColors={ disableCustomColors }
+				enableAlpha={ enableAlpha }
+				enableStyle={ enableStyle }
+				isStyleSettable={ isStyleSettable }
+				onChange={ onBorderChange }
+				previousStyleSelection={ previousStyleSelection }
+				__experimentalIsRenderedInSidebar={
+					__experimentalIsRenderedInSidebar
+				}
+			/>
+		</Spacer>
+	);
 
 	return (
 		<View as="fieldset" { ...otherProps } ref={ forwardedRef }>
@@ -68,51 +96,58 @@ const UnconnectedBorderControl = (
 				hideLabelFromVision={ hideLabelFromVision }
 			/>
 			<HStack spacing={ 4 } className={ innerWrapperClassName }>
-				<UnitControl
-					prefix={
-						<Spacer marginRight={ 1 } marginBottom={ 0 }>
-							<BorderControlDropdown
-								border={ border }
-								colors={ colors }
-								__unstablePopoverProps={
-									__unstablePopoverProps
-								}
-								disableCustomColors={ disableCustomColors }
-								enableAlpha={ enableAlpha }
-								enableStyle={ enableStyle }
-								isStyleSettable={ isStyleSettable }
-								onChange={ onBorderChange }
-								previousStyleSelection={
-									previousStyleSelection
-								}
-								__experimentalIsRenderedInSidebar={
-									__experimentalIsRenderedInSidebar
-								}
+				{ showCustomWidth ? (
+					<>
+						<UnitControl
+							prefix={ dropdownPrefix }
+							label={ __( 'Border width' ) }
+							hideLabelFromVision
+							min={ 0 }
+							disabled={ disableCustomWidth }
+							onChange={ onWidthChange }
+							value={ border?.width || '' }
+							placeholder={ placeholder }
+							units={ BORDER_WIDTH_UNITS }
+							disableUnits={ disableUnits }
+							__unstableInputWidth={ inputWidth }
+						/>
+						{ withSlider && ! disableCustomWidth && (
+							<RangeControl
+								label={ __( 'Border width' ) }
+								hideLabelFromVision
+								className={ sliderClassName }
+								initialPosition={ 0 }
+								max={ 100 }
+								min={ 0 }
+								onChange={ onSliderChange }
+								step={ widthUnit === 'px' ? 1 : 0.1 }
+								value={ widthValue || undefined }
+								withInputField={ false }
 							/>
-						</Spacer>
-					}
-					label={ __( 'Border width' ) }
-					hideLabelFromVision
-					min={ 0 }
-					onChange={ onWidthChange }
-					value={ border?.width || '' }
-					placeholder={ placeholder }
-					units={ BORDER_WIDTH_UNITS }
-					disableUnits={ disableUnits }
-					__unstableInputWidth={ inputWidth }
-				/>
-				{ withSlider && (
-					<RangeControl
+						) }
+					</>
+				) : (
+					<SelectControl
+						prefix={ dropdownPrefix }
 						label={ __( 'Border width' ) }
 						hideLabelFromVision
-						className={ sliderClassName }
-						initialPosition={ 0 }
-						max={ 100 }
-						min={ 0 }
-						onChange={ onSliderChange }
-						step={ widthUnit === 'px' ? 1 : 0.1 }
-						value={ widthValue || undefined }
-						withInputField={ false }
+						options={ widthPresetOptions }
+						value={ selectedWidthPresetValue }
+						onChange={ onWidthChange }
+					/>
+				) }
+				{ hasWidthPresets && ! disableCustomWidth && (
+					<Button
+						icon={ settingsIcon }
+						iconSize={ 24 }
+						isPressed={ showCustomWidth }
+						label={
+							showCustomWidth
+								? __( 'Use preset' )
+								: __( 'Set custom value' )
+						}
+						onClick={ toggleCustomWidth }
+						size="small"
 					/>
 				) }
 			</HStack>

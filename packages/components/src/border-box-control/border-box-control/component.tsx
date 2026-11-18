@@ -44,6 +44,7 @@ const UnconnectedBorderBoxControl = (
 		className,
 		colors,
 		disableCustomColors,
+		disableCustomWidth,
 		disableUnits,
 		enableAlpha,
 		enableStyle,
@@ -61,6 +62,7 @@ const UnconnectedBorderBoxControl = (
 		popoverOffset,
 		splitValue,
 		toggleLinked,
+		widthPresets,
 		wrapperClassName,
 		__experimentalIsRenderedInSidebar,
 		'aria-label': ariaLabel,
@@ -153,6 +155,7 @@ const UnconnectedBorderBoxControl = (
 						colors={ colors }
 						disableUnits={ disableUnits }
 						disableCustomColors={ disableCustomColors }
+						disableCustomWidth={ disableCustomWidth }
 						enableAlpha={ enableAlpha }
 						enableStyle={ enableStyle }
 						onChange={ onLinkedChange }
@@ -162,6 +165,7 @@ const UnconnectedBorderBoxControl = (
 						__unstablePopoverProps={ popoverProps }
 						shouldSanitizeBorder={ false } // This component will handle that.
 						value={ linkedValue }
+						widthPresets={ widthPresets }
 						withSlider
 						width="116px"
 						__experimentalIsRenderedInSidebar={
@@ -172,12 +176,14 @@ const UnconnectedBorderBoxControl = (
 					<BorderBoxControlSplitControls
 						colors={ colors }
 						disableCustomColors={ disableCustomColors }
+						disableCustomWidth={ disableCustomWidth }
 						enableAlpha={ enableAlpha }
 						enableStyle={ enableStyle }
 						onChange={ onSplitChange }
 						popoverPlacement={ popoverPlacement }
 						popoverOffset={ popoverOffset }
 						value={ splitValue }
+						widthPresets={ widthPresets }
 						__experimentalIsRenderedInSidebar={
 							__experimentalIsRenderedInSidebar
 						}

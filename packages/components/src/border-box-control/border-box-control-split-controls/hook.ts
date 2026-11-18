@@ -10,8 +10,10 @@ export function useBorderBoxControlSplitControls(
 	const {
 		className,
 		colors = [],
+		disableCustomWidth = false,
 		enableAlpha = false,
 		enableStyle = true,
+		widthPresets,
 		__experimentalIsRenderedInSidebar = false,
 		...otherProps
 	} = useContextSystem( props, 'BorderBoxControlSplitControls' );
@@ -24,12 +26,14 @@ export function useBorderBoxControlSplitControls(
 		),
 		className: clsx( styles[ 'split-controls' ], className ),
 		colors,
+		disableCustomWidth,
 		enableAlpha,
 		enableStyle,
 		rightAlignedClassName: clsx(
 			styles[ 'right-border-control' ],
 			className
 		),
+		widthPresets,
 		__experimentalIsRenderedInSidebar,
 	};
 }

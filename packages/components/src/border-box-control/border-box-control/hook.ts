@@ -21,12 +21,14 @@ export function useBorderBoxControl(
 	const {
 		className,
 		colors = [],
+		disableCustomWidth = false,
 		onChange,
 		enableAlpha = false,
 		enableStyle = true,
 		hideLabelFromVision,
 		label,
 		value,
+		widthPresets,
 		__experimentalIsRenderedInSidebar = false,
 		// Deprecated props, no longer used.
 		size: _size,
@@ -124,6 +126,7 @@ export function useBorderBoxControl(
 		headerClassName,
 		hideLabelFromVision,
 		label,
+		disableCustomWidth,
 		disableUnits: mixedBorders && ! hasWidthValue,
 		enableAlpha,
 		enableStyle,
@@ -135,6 +138,7 @@ export function useBorderBoxControl(
 		toggleLinked,
 		linkedValue,
 		splitValue,
+		widthPresets,
 		wrapperClassName,
 		__experimentalIsRenderedInSidebar,
 	};

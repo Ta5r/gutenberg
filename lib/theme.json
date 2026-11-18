@@ -6,6 +6,7 @@
 		"useRootPaddingAwareAlignments": false,
 		"border": {
 			"color": false,
+			"customWidth": true,
 			"radius": false,
 			"style": false,
 			"width": false

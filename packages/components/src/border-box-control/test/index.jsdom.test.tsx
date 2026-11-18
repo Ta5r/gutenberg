@@ -657,5 +657,53 @@ describe( 'BorderBoxControl', () => {
 				expect( props.onChange ).toHaveBeenCalledWith( defaultBorder );
 			} );
 		} );
+
+		describe( 'Width presets', () => {
+			const widthPresets = [
+				{ name: 'Small', slug: 'sm', size: '1px' },
+				{ name: 'Medium', slug: 'md', size: '2px' },
+				{ name: 'Large', slug: 'lg', size: '4px' },
+			];
+
+			it( 'forwards widthPresets and disableCustomWidth to linked and split controls', async () => {
+				const user = userEvent.setup();
+				render(
+					<TestBorderBoxControl
+						{ ...props }
+						value={ {
+							color: '#72aee6',
+							style: 'solid',
+							width: '1px',
+						} }
+						widthPresets={ widthPresets }
+						disableCustomWidth
+					/>
+				);
+
+				const linkedSelect = screen.getByRole( 'combobox', {
+					name: 'Border width',
+				} );
+				expect( linkedSelect ).toHaveValue( '1px' );
+				expect(
+					screen.queryByRole( 'button', { name: 'Set custom value' } )
+				).not.toBeInTheDocument();
+
+				await user.selectOptions( linkedSelect, '4px' );
+				expect( props.onChange ).toHaveBeenCalledWith( {
+					color: '#72aee6',
+					style: 'solid',
+					width: '4px',
+				} );
+
+				await user.click(
+					screen.getByRole( 'button', { name: 'Unlink sides' } )
+				);
+
+				const splitSelects = screen.getAllByRole( 'combobox', {
+					name: 'Border width',
+				} );
+				expect( splitSelects ).toHaveLength( 4 );
+			} );
+		} );
 	} );
 } );
