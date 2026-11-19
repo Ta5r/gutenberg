@@ -46,6 +46,7 @@ import {
 	DEFAULT_BLOCK_STYLE_STATE,
 	getStyleStateViewport,
 } from './private-selectors';
+import { rootBlockNameKey } from './private-keys';
 import type {
 	InserterItem,
 	InserterVariation,
@@ -1718,6 +1719,26 @@ export function getTemplateLock( state: State, rootClientId?: string | null ) {
 }
 
 /**
+ * Returns the root block name(s) defined in editor settings, representing
+ * the currently edited entity (such as 'core/template-part', 'core/navigation', etc.).
+ *
+ * @param state Editor state.
+ * @return Array of root block names.
+ */
+function getRootBlockNames( state: State ): string[] {
+	const settings = getSettings( state );
+	const rootBlock =
+		( settings?.[ rootBlockNameKey ] as string | string[] | undefined ) ??
+		settings?.rootBlockName ??
+		settings?.__experimentalRootBlockName;
+
+	if ( ! rootBlock ) {
+		return [];
+	}
+	return Array.isArray( rootBlock ) ? rootBlock : [ rootBlock ];
+}
+
+/**
  * Determines if the given block type is visible in the inserter.
  * Note that this is different than whether a block is allowed to be inserted.
  * In some cases, the block is not allowed in a given position but
@@ -1783,6 +1804,13 @@ const isBlockVisibleInTheInserter = (
 			}
 			current = state.blocks.parents.get( current! );
 		} while ( current );
+
+		if ( ! hasParent ) {
+			const rootBlockNames = getRootBlockNames( state );
+			if ( rootBlockNames.some( ( name ) => parents.includes( name ) ) ) {
+				hasParent = true;
+			}
+		}
 
 		return hasParent;
 	}
@@ -1949,10 +1977,26 @@ const canInsertBlockTypeUnmemoized = (
 	}
 
 	const blockAllowedParentBlocks = blockType.parent;
-	const hasBlockAllowedParent = checkAllowList(
+	let hasBlockAllowedParent = checkAllowList(
 		blockAllowedParentBlocks,
 		parentName
 	);
+
+	const rootBlockNames = getRootBlockNames( state );
+
+	if (
+		hasBlockAllowedParent === false &&
+		parentName === null &&
+		blockAllowedParentBlocks
+	) {
+		if (
+			rootBlockNames.some( ( name ) =>
+				checkAllowList( blockAllowedParentBlocks, name )
+			)
+		) {
+			hasBlockAllowedParent = true;
+		}
+	}
 
 	let hasBlockAllowedAncestor = true;
 	const blockAllowedAncestorBlocks = blockType.ancestor;
@@ -1968,6 +2012,12 @@ const canInsertBlockTypeUnmemoized = (
 				getBlockName( state, ancestorClientId )
 			)
 		);
+
+		if ( ! hasBlockAllowedAncestor ) {
+			hasBlockAllowedAncestor = rootBlockNames.some( ( name ) =>
+				checkAllowList( blockAllowedAncestorBlocks, name )
+			);
+		}
 	}
 
 	const canInsert =

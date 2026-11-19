@@ -6,6 +6,7 @@ import {
 	selectBlockPatternsKey,
 	userPatternCategoriesSelectKey,
 	currentUserIdSelectKey,
+	rootBlockNameKey,
 } from './private-keys';
 import { unlock } from '../lock-unlock';
 import { STORE_NAME } from './constants';
@@ -179,6 +180,9 @@ export const getInsertBlockTypeDependants: (
 			state.blocks.order.get( rootClientId || '' ),
 			state.settings.allowedBlockTypes,
 			state.settings.templateLock,
+			state.settings[ rootBlockNameKey ],
+			state.settings.rootBlockName,
+			state.settings.__experimentalRootBlockName,
 			getBlockEditingMode( state, rootClientId! ),
 			getSectionRootClientId( state ),
 			isSectionBlock( state, rootClientId! ),

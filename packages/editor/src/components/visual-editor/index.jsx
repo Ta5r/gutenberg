@@ -160,6 +160,10 @@ function VisualEditor( {
 
 		if ( postTypeSlug === PATTERN_POST_TYPE ) {
 			_wrapperBlockName = 'core/block';
+		} else if ( postTypeSlug === TEMPLATE_PART_POST_TYPE ) {
+			_wrapperBlockName = 'core/template-part';
+		} else if ( postTypeSlug === NAVIGATION_POST_TYPE ) {
+			_wrapperBlockName = 'core/navigation';
 		} else if ( _renderingMode === 'post-only' ) {
 			_wrapperBlockName = 'core/post-content';
 		}

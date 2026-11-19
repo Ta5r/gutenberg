@@ -24,7 +24,7 @@ import type { Block, BlockConfiguration } from '@wordpress/blocks';
 import * as selectors from '../selectors';
 import { store } from '../';
 import { lock } from '../../lock-unlock';
-import { sectionRootClientIdKey } from '../private-keys';
+import { sectionRootClientIdKey, rootBlockNameKey } from '../private-keys';
 import { isFiltered } from '../utils';
 import type { BlockTemplate, State } from '../types';
 
@@ -266,6 +266,32 @@ describe( 'selectors', () => {
 		);
 
 		registerBlockType(
+			'core/test-block-requires-template-part-parent',
+			partial< BlockConfiguration >( {
+				apiVersion: 3,
+				save: () => null,
+				category: 'text',
+				title: 'Test Block requires template part parent',
+				icon: 'test',
+				keywords: [ 'testing' ],
+				parent: [ 'core/template-part' ],
+			} )
+		);
+
+		registerBlockType(
+			'core/test-block-requires-template-part-ancestor',
+			partial< BlockConfiguration >( {
+				apiVersion: 3,
+				save: () => null,
+				category: 'text',
+				title: 'Test Block requires template part ancestor',
+				icon: 'test',
+				keywords: [ 'testing' ],
+				ancestor: [ 'core/template-part' ],
+			} )
+		);
+
+		registerBlockType(
 			'core/test-content-block',
 			partial< BlockConfiguration >( {
 				apiVersion: 3,
@@ -298,6 +324,10 @@ describe( 'selectors', () => {
 		unregisterBlockType( 'core/test-block-parent' );
 		unregisterBlockType( 'core/test-block-requires-ancestor' );
 		unregisterBlockType( 'core/test-block-requires-ancestor-parent' );
+		unregisterBlockType( 'core/test-block-requires-template-part-parent' );
+		unregisterBlockType(
+			'core/test-block-requires-template-part-ancestor'
+		);
 		unregisterBlockType( 'core/test-content-block' );
 
 		// @ts-expect-error Deliberately resets the handler to no block.
@@ -3263,6 +3293,194 @@ describe( 'selectors', () => {
 			).toBe( true );
 		} );
 
+		describe( 'rootBlockName in settings', () => {
+			it( 'should allow blocks requiring parent matching rootBlockName when in editor root', () => {
+				const state = partial< State >( {
+					blocks: {
+						byClientId: new Map(),
+						attributes: new Map(),
+						parents: new Map(),
+						order: new Map(),
+						blockEditingModes: new Map(),
+					},
+					blockListSettings: new Map(),
+					settings: {
+						rootBlockName: 'core/template-part',
+					},
+				} );
+				expect(
+					canInsertBlockType(
+						state,
+						'core/test-block-requires-template-part-parent'
+					)
+				).toBe( true );
+			} );
+
+			it( 'should allow blocks requiring parent matching rootBlockNameKey symbol when in editor root', () => {
+				const state = partial< State >( {
+					blocks: {
+						byClientId: new Map(),
+						attributes: new Map(),
+						parents: new Map(),
+						order: new Map(),
+						blockEditingModes: new Map(),
+					},
+					blockListSettings: new Map(),
+					settings: {
+						[ rootBlockNameKey ]: 'core/template-part',
+					},
+				} );
+				expect(
+					canInsertBlockType(
+						state,
+						'core/test-block-requires-template-part-parent'
+					)
+				).toBe( true );
+			} );
+
+			it( 'should deny blocks requiring parent matching rootBlockName when inside a child block', () => {
+				const state = partial< State >( {
+					blocks: {
+						byClientId: new Map(
+							Object.entries( {
+								block1: { name: 'core/test-block-a' },
+							} )
+						),
+						attributes: new Map(
+							Object.entries( {
+								block1: {},
+							} )
+						),
+						parents: new Map(),
+						order: new Map(),
+						blockEditingModes: new Map(),
+					},
+					blockListSettings: new Map(),
+					settings: {
+						rootBlockName: 'core/template-part',
+					},
+				} );
+				expect(
+					canInsertBlockType(
+						state,
+						'core/test-block-requires-template-part-parent',
+						'block1'
+					)
+				).toBe( false );
+			} );
+
+			it( 'should allow blocks requiring ancestor matching rootBlockName at root level', () => {
+				const state = partial< State >( {
+					blocks: {
+						byClientId: new Map(),
+						attributes: new Map(),
+						parents: new Map(),
+						order: new Map(),
+						blockEditingModes: new Map(),
+					},
+					blockListSettings: new Map(),
+					settings: {
+						rootBlockName: 'core/template-part',
+					},
+				} );
+				expect(
+					canInsertBlockType(
+						state,
+						'core/test-block-requires-template-part-ancestor'
+					)
+				).toBe( true );
+			} );
+
+			it( 'should allow blocks requiring ancestor matching rootBlockName inside child blocks', () => {
+				const state = partial< State >( {
+					blocks: {
+						byClientId: new Map(
+							Object.entries( {
+								block1: { name: 'core/test-block-a' },
+							} )
+						),
+						attributes: new Map(
+							Object.entries( {
+								block1: {},
+							} )
+						),
+						parents: new Map(),
+						order: new Map(),
+						blockEditingModes: new Map(),
+					},
+					blockListSettings: new Map(
+						Object.entries( {
+							block1: {},
+						} )
+					),
+					settings: {
+						rootBlockName: 'core/template-part',
+					},
+				} );
+				expect(
+					canInsertBlockType(
+						state,
+						'core/test-block-requires-template-part-ancestor',
+						'block1'
+					)
+				).toBe( true );
+			} );
+
+			it( 'should deny blocks requiring parent/ancestor when rootBlockName does not match', () => {
+				const state = partial< State >( {
+					blocks: {
+						byClientId: new Map(),
+						attributes: new Map(),
+						parents: new Map(),
+						order: new Map(),
+						blockEditingModes: new Map(),
+					},
+					blockListSettings: new Map(),
+					settings: {
+						rootBlockName: 'core/navigation',
+					},
+				} );
+				expect(
+					canInsertBlockType(
+						state,
+						'core/test-block-requires-template-part-parent'
+					)
+				).toBe( false );
+				expect(
+					canInsertBlockType(
+						state,
+						'core/test-block-requires-template-part-ancestor'
+					)
+				).toBe( false );
+			} );
+
+			it( 'should deny blocks requiring parent/ancestor when no rootBlockName is set', () => {
+				const state = partial< State >( {
+					blocks: {
+						byClientId: new Map(),
+						attributes: new Map(),
+						parents: new Map(),
+						order: new Map(),
+						blockEditingModes: new Map(),
+					},
+					blockListSettings: new Map(),
+					settings: {},
+				} );
+				expect(
+					canInsertBlockType(
+						state,
+						'core/test-block-requires-template-part-parent'
+					)
+				).toBe( false );
+				expect(
+					canInsertBlockType(
+						state,
+						'core/test-block-requires-template-part-ancestor'
+					)
+				).toBe( false );
+			} );
+		} );
+
 		it( 'should allow blocks to be inserted in a descendant of a required ancestor', () => {
 			const state = partial< State >( {
 				blocks: {
@@ -4082,6 +4300,46 @@ describe( 'selectors', () => {
 				( item ) => item.id === 'core/test-block-b'
 			)!;
 			expect( reusableBlock2Item.frecency ).toBe( 40 );
+		} );
+
+		it( 'should show blocks in inserter if parent or ancestor corresponds to rootBlockName', async () => {
+			await dispatch( store ).updateSettings( {
+				rootBlockName: 'core/template-part',
+			} );
+			const itemsWithRootBlock = select( store ).getInserterItems();
+			expect(
+				itemsWithRootBlock.some(
+					( item ) =>
+						item.id ===
+						'core/test-block-requires-template-part-parent'
+				)
+			).toBe( true );
+			expect(
+				itemsWithRootBlock.some(
+					( item ) =>
+						item.id ===
+						'core/test-block-requires-template-part-ancestor'
+				)
+			).toBe( true );
+
+			await dispatch( store ).updateSettings( {
+				rootBlockName: undefined,
+			} );
+			const itemsWithoutRootBlock = select( store ).getInserterItems();
+			expect(
+				itemsWithoutRootBlock.some(
+					( item ) =>
+						item.id ===
+						'core/test-block-requires-template-part-parent'
+				)
+			).toBe( false );
+			expect(
+				itemsWithoutRootBlock.some(
+					( item ) =>
+						item.id ===
+						'core/test-block-requires-template-part-ancestor'
+				)
+			).toBe( false );
 		} );
 	} );
 

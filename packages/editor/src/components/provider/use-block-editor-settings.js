@@ -123,6 +123,8 @@ const BLOCK_EDITOR_SETTINGS = [
 	'__unstableHasCustomAppender',
 	'__unstableResolvedAssets',
 	'__unstableIsBlockBasedTheme',
+	'rootBlockName',
+	'__experimentalRootBlockName',
 ];
 
 const {
@@ -142,6 +144,7 @@ const {
 	mediaUploadOnSuccessKey,
 	mediaSideloadFromUrlKey,
 	openMediaEditorModalKey,
+	rootBlockNameKey,
 } = unlock( privateApis );
 
 /**
@@ -386,6 +389,23 @@ function useBlockEditorSettings( settings, postType, postId, renderingMode ) {
 	);
 
 	return useMemo( () => {
+		let rootBlockName =
+			settings[ rootBlockNameKey ] ||
+			settings.rootBlockName ||
+			settings.__experimentalRootBlockName;
+
+		if ( ! rootBlockName ) {
+			if ( postType === 'wp_template_part' ) {
+				rootBlockName = 'core/template-part';
+			} else if ( postType === 'wp_navigation' ) {
+				rootBlockName = 'core/navigation';
+			} else if ( postType === 'wp_block' ) {
+				rootBlockName = 'core/block';
+			} else if ( renderingMode === 'post-only' ) {
+				rootBlockName = 'core/post-content';
+			}
+		}
+
 		const blockEditorSettings = {
 			...Object.fromEntries(
 				Object.entries( settings ).filter( ( [ key ] ) =>
@@ -486,6 +506,12 @@ function useBlockEditorSettings( settings, postType, postId, renderingMode ) {
 				settings.disableContentOnlyForTemplateParts,
 			...( deviceType ? { [ deviceTypeKey ]: deviceType } : {} ),
 			[ isNavigationOverlayContextKey ]: isNavigationOverlayContext,
+			...( rootBlockName
+				? {
+						[ rootBlockNameKey ]: rootBlockName,
+						rootBlockName,
+					}
+				: {} ),
 		};
 
 		if ( isRevisionsMode ) {

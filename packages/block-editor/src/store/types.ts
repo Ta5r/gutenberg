@@ -27,6 +27,7 @@ import type {
 	deviceTypeKey,
 	isIsolatedEditorKey,
 	reusableBlocksSelectKey,
+	rootBlockNameKey,
 	sectionRootClientIdKey,
 	selectBlockPatternsKey,
 	userPatternCategoriesSelectKey,
@@ -448,6 +449,9 @@ export type Settings = Record< string | symbol, unknown > & {
 	__unstableIsBlockBasedTheme?: boolean;
 	/** The styles of the editor canvas, flagged when generated from global styles. */
 	styles?: Array< EditorStylesStyle & { isGlobalStyles?: boolean } >;
+	/** The block name(s) corresponding to the edited entity at the editor root. */
+	rootBlockName?: string | string[];
+	__experimentalRootBlockName?: string | string[];
 	[ currentUserIdSelectKey ]?: (
 		select: typeof globalSelect
 	) => number | undefined;
@@ -457,6 +461,7 @@ export type Settings = Record< string | symbol, unknown > & {
 	[ reusableBlocksSelectKey ]?: (
 		select: typeof globalSelect
 	) => UserPattern[] | null | undefined;
+	[ rootBlockNameKey ]?: string | string[];
 	[ sectionRootClientIdKey ]?: string;
 	[ selectBlockPatternsKey ]?: (
 		select: typeof globalSelect
