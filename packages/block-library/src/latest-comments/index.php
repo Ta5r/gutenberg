@@ -50,6 +50,24 @@ function render_block_core_latest_comments( $attributes ) {
 		$display_content = $attributes['displayContent'] ?? 'excerpt';
 	}
 
+	$exclude_post_author = ! empty( $attributes['excludePostAuthor'] );
+
+	if ( $exclude_post_author ) {
+		$filter_comments_clauses = static function ( $clauses ) {
+			global $wpdb;
+
+			if ( false === strpos( $clauses['join'], $wpdb->posts ) ) {
+				$clauses['join'] .= " JOIN $wpdb->posts ON $wpdb->posts.ID = $wpdb->comments.comment_post_ID";
+			}
+
+			$clauses['where'] .= " AND ( $wpdb->comments.user_id = 0 OR $wpdb->posts.post_author IS NULL OR $wpdb->comments.user_id != $wpdb->posts.post_author )";
+
+			return $clauses;
+		};
+
+		add_filter( 'comments_clauses', $filter_comments_clauses );
+	}
+
 	$comments = get_comments(
 		/** This filter is documented in wp-includes/widgets/class-wp-widget-recent-comments.php */
 		apply_filters(
@@ -62,6 +80,29 @@ function render_block_core_latest_comments( $attributes ) {
 			array()
 		)
 	);
+
+	if ( $exclude_post_author ) {
+		remove_filter( 'comments_clauses', $filter_comments_clauses );
+
+		if ( ! empty( $comments ) ) {
+			$comments = array_values(
+				array_filter(
+					$comments,
+					static function ( $comment ) {
+						$post = get_post( $comment->comment_post_ID );
+						if ( ! $post ) {
+							return true;
+						}
+
+						$post_author_id    = (int) $post->post_author;
+						$comment_author_id = (int) $comment->user_id;
+
+						return 0 === $comment_author_id || $comment_author_id !== $post_author_id;
+					}
+				)
+			);
+		}
+	}
 
 	$list_items_markup = '';
 	if ( ! empty( $comments ) ) {

@@ -422,7 +422,7 @@ Display a list of your most recent comments.
 -	**Name:** [core/latest-comments](https://developer.wordpress.org/block-editor/reference-guides/core-blocks/core-blocks-widgets/core-block-latest-comments/)
 -	**Category:** [widgets](https://developer.wordpress.org/block-editor/reference-guides/core-blocks/core-blocks-widgets/)
 -	**Supports:** align, anchor, background (backgroundImage, backgroundSize, gradient), color (background, gradients, link, text), dimensions (minHeight, minWidth), interactivity (clientNavigation), shadow, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
--	**Attributes:** commentsToShow, displayAvatar, displayContent, displayDate
+-	**Attributes:** commentsToShow, displayAvatar, displayContent, displayDate, excludePostAuthor
 
 ## Latest Posts
 

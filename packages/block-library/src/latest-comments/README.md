@@ -19,6 +19,7 @@ _Defined via the [`attributes`](https://developer.wordpress.org/block-editor/ref
 | `displayAvatar` | `boolean` | `true` | — |
 | `displayDate` | `boolean` | `true` | — |
 | `displayContent` | `string` | `"excerpt"` | [Enum](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-attributes/#enum-validation): `none`, `excerpt`, `full` |
+| `excludePostAuthor` | `boolean` | `false` | — |
 
 ## Supports
 
